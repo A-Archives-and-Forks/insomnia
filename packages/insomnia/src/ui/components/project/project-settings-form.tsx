@@ -143,12 +143,6 @@ export const ProjectSettingsForm: FC<Props> = ({
     }
   }, [upsertProjectFetcher.data, upsertProjectFetcher.state]);
 
-  useEffect(() => {
-    if (storageRules) {
-      setStorageType(getDefaultProjectStorageType(storageRules, project));
-    }
-  }, [storageRules, project]);
-
   const onGitRepoFormSubmit = (gitRepositoryPatch: Partial<GitRepository & { ref?: string }>) => {
     const { author, credentials, created, modified, isPrivate, needsFullClone, uriNeedsMigration, ...repoPatch } =
       gitRepositoryPatch;
