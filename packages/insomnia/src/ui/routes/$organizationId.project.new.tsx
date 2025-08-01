@@ -6,65 +6,53 @@ import { invariant } from '../../utils/invariant';
 import { SegmentEvent } from '../analytics';
 import { insomniaFetch } from '../insomniaFetch';
 
-export async function action({ request, params }: ActionFunctionArgs) {
-  const { organizationId } = params;
+export interface CreateProjectActionResult {
+  id?: string;
+  error?: string;
+}
 
-  invariant(organizationId, 'Organization ID is required');
-  const newProjectData = (await request.json()) as {
-    name: string;
-    storageType: 'local' | 'remote' | 'git';
-    authorName: string;
-    authorEmail: string;
-    uri: string;
-    username: string;
-    password: string;
-    token: string;
-    oauth2format: OauthProviderName;
-  };
+type CreateProjectData =
+  | { name: string; storageType: 'local' | 'remote' }
+  | {
+      name: string;
+      storageType: 'git';
+      authorName: string;
+      authorEmail: string;
+      uri: string;
+      username: string;
+      password: string;
+      token: string;
+      oauth2format?: OauthProviderName;
+    };
 
-  const user = await models.userSession.getOrCreate();
-  const sessionId = user.id;
-  invariant(sessionId, 'User must be logged in to create a project');
+export const createProject = async (organizationId: string, newProjectData: CreateProjectData) => {
+  const createProjectImpl = async (organizationId: string, newProjectData: CreateProjectData) => {
+    const user = await models.userSession.getOrCreate();
+    const sessionId = user.id;
+    invariant(sessionId, 'User must be logged in to create a project');
 
-  if (newProjectData.storageType === 'local') {
-    const project = await models.project.create({
-      name: newProjectData.name,
-      parentId: organizationId,
-    });
+    if (newProjectData.storageType === 'local') {
+      const project = await models.project.create({
+        name: newProjectData.name,
+        parentId: organizationId,
+      });
 
-    window.main.trackSegmentEvent({
-      event: SegmentEvent.projectCreated,
-      properties: {
-        storage: 'local',
-      },
-    });
-
-    return redirect(`/organization/${organizationId}/project/${project._id}`);
-  }
-
-  if (newProjectData.storageType === 'git') {
-    const { projectId, errors } = await window.main.git.cloneGitRepo({
-      organizationId,
-      ...newProjectData,
-    });
-
-    if (errors) {
-      return {
-        error: errors.join(', '),
-      };
+      return project._id;
     }
 
-    window.main.trackSegmentEvent({
-      event: SegmentEvent.projectCreated,
-      properties: {
-        storage: 'git',
-      },
-    });
+    if (newProjectData.storageType === 'git') {
+      const { projectId, errors } = await window.main.git.cloneGitRepo({
+        organizationId,
+        ...newProjectData,
+      });
 
-    return redirect(`/organization/${organizationId}/project/${projectId}`);
-  }
+      if (errors) {
+        throw new Error(errors.join(', '));
+      }
 
-  try {
+      return projectId;
+    }
+
     const newCloudProject = await insomniaFetch<
       | {
           id: string;
@@ -83,15 +71,6 @@ export async function action({ request, params }: ActionFunctionArgs) {
       sessionId,
     });
 
-    if (newCloudProject && !('error' in newCloudProject)) {
-      window.main.trackSegmentEvent({
-        event: SegmentEvent.projectCreated,
-        properties: {
-          storage: 'remote',
-        },
-      });
-    }
-
     if (!newCloudProject || 'error' in newCloudProject) {
       let error = 'An unexpected error occurred while creating the project. Please try again.';
       if (newCloudProject.error === 'FORBIDDEN') {
@@ -106,9 +85,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
         error = newCloudProject.message ?? 'The owner of the organization allows only Local Vault project creation.';
       }
 
-      return {
-        error,
-      };
+      throw new Error(error);
     }
 
     const project = await models.project.create({
@@ -118,7 +95,29 @@ export async function action({ request, params }: ActionFunctionArgs) {
       parentId: organizationId,
     });
 
-    return redirect(`/organization/${organizationId}/project/${project._id}`);
+    return project._id;
+  };
+
+  const newProjectId = await createProjectImpl(organizationId, newProjectData);
+  window.main.trackSegmentEvent({
+    event: SegmentEvent.projectCreated,
+    properties: {
+      storage: newProjectData.storageType,
+    },
+  });
+
+  return newProjectId;
+};
+
+export async function action({ request, params }: ActionFunctionArgs) {
+  const { organizationId } = params;
+
+  invariant(organizationId, 'Organization ID is required');
+  const newProjectData = (await request.json()) as CreateProjectData;
+
+  try {
+    const newProjectId = await createProject(organizationId, newProjectData);
+    return redirect(`/organization/${organizationId}/project/${newProjectId}`);
   } catch (err) {
     console.log(err);
     return {

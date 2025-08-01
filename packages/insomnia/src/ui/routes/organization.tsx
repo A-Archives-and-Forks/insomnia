@@ -84,6 +84,7 @@ export interface FeatureStatus {
 }
 
 export interface FeatureList {
+  bulkImport: FeatureStatus;
   gitSync: FeatureStatus;
   orgBasicRbac: FeatureStatus;
 }

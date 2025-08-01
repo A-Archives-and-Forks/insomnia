@@ -17,31 +17,51 @@ export interface ImportResourcesActionResult {
   done: boolean;
 }
 
-export async function action({ request }: ActionFunctionArgs) {
-  const formData = await request.formData();
-  const organizationId = formData.get('organizationId');
-  const projectId = formData.get('projectId');
-  const workspaceId = formData.get('workspaceId');
-
-  invariant(typeof organizationId === 'string', 'OrganizationId is required.');
-  invariant(typeof projectId === 'string', 'ProjectId is required.');
+export const importScannedResources = async ({
+  organizationId,
+  projectId,
+  workspaceId,
+}: {
+  organizationId: string;
+  projectId: string;
+  workspaceId?: string;
+}) => {
+  invariant(organizationId && typeof organizationId === 'string', 'OrganizationId is required.');
+  invariant(projectId && typeof projectId === 'string', 'ProjectId is required.');
 
   const project = await models.project.getById(projectId);
   invariant(project, 'Project not found.');
+
   if (typeof workspaceId === 'string' && workspaceId) {
     await importResourcesToWorkspace({
       workspaceId: workspaceId,
     });
+  } else {
+    await importResourcesToProject({
+      projectId: project._id,
+      syncNewWorkspaceIfNeeded,
+    });
+  }
+};
+
+export async function action({ request }: ActionFunctionArgs) {
+  try {
+    const formData = await request.formData();
+
+    await importScannedResources({
+      organizationId: formData.get('organizationId') as string,
+      projectId: formData.get('projectId') as string,
+      workspaceId: formData.get('workspaceId') as string | undefined,
+    });
 
     // TODO: find more elegant way to wait for import to finish
     return { done: true };
+  } catch (error) {
+    return {
+      errors: [error instanceof Error ? error.message : 'An unknown error occurred'],
+      done: false,
+    };
   }
-
-  await importResourcesToProject({
-    projectId: project._id,
-    syncNewWorkspaceIfNeeded,
-  });
-  return { done: true };
 }
 
 // The reason why we put this function here is because this function indirectly depends on some modules that can only run in a browser environment.

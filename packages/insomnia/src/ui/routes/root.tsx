@@ -17,7 +17,7 @@ import { ErrorBoundary } from '../components/error-boundary';
 import { showError, showModal } from '../components/modals';
 import { AlertModal } from '../components/modals/alert-modal';
 import { AskModal } from '../components/modals/ask-modal';
-import { ImportModal } from '../components/modals/import-modal';
+import { ImportModal } from '../components/modals/import-modal/import-modal';
 import { SettingsModal, TAB_INDEX_PLUGINS, TAB_INDEX_THEMES } from '../components/modals/settings-modal';
 import { Toaster } from '../components/toast-notification';
 import { AppHooks } from '../containers/app-hooks';

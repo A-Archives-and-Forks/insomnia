@@ -25,7 +25,7 @@ import { Dropdown, DropdownItem, DropdownSection, ItemContent } from '../base/dr
 import { Icon } from '../icon';
 import { showError, showModal } from '../modals';
 import { ExportRequestsModal } from '../modals/export-requests-modal';
-import { ImportModal } from '../modals/import-modal';
+import { ImportModal } from '../modals/import-modal/import-modal';
 import { PromptModal } from '../modals/prompt-modal';
 import { WorkspaceDuplicateModal } from '../modals/workspace-duplicate-modal';
 import { WorkspaceSettingsModal } from '../modals/workspace-settings-modal';
