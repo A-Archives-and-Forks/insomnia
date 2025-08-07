@@ -4,7 +4,7 @@ const BINARY_PREFIX = 'Insomnia.Core';
 
 /**
  * @type {import('electron-builder').Configuration}
- * @see https://www.electron.build/configuration/configuration
+ * @see https://www.electron.build/configuration
  */
 const config = {
   npmRebuild: false,

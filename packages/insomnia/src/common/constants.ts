@@ -12,6 +12,7 @@ export const INSOMNIA_GITLAB_REDIRECT_URI = env.INSOMNIA_GITLAB_REDIRECT_URI;
 export const INSOMNIA_GITLAB_CLIENT_ID = env.INSOMNIA_GITLAB_CLIENT_ID;
 export const INSOMNIA_GITLAB_API_URL = env.INSOMNIA_GITLAB_API_URL;
 export const PLAYWRIGHT = env.PLAYWRIGHT;
+
 // App Stuff
 export const getSkipOnboarding = () => env.INSOMNIA_SKIP_ONBOARDING;
 export const getInsomniaSession = () => env.INSOMNIA_SESSION;
@@ -28,6 +29,7 @@ export const getAppDefaultDarkTheme = () => appConfig.darkTheme;
 export const getAppSynopsis = () => appConfig.synopsis;
 export const getAppId = () => appConfig.appId;
 export const getAppPlatform = () => process.platform;
+export const getAppBundlePlugins = () => appConfig.bundlePlugins;
 export const isMac = () => getAppPlatform() === 'darwin';
 export const isLinux = () => getAppPlatform() === 'linux';
 export const isWindows = () => getAppPlatform() === 'win32';
@@ -359,6 +361,8 @@ export const sortOrderName: Record<SortOrder, string> = {
   [SORT_TYPE_DESC]: 'Folders First',
   [SORT_TYPE_ASC]: 'Requests First',
 };
+
+export const EXTERNAL_VAULT_PLUGIN_NAME = getAppBundlePlugins()[0].name;
 
 export type DashboardSortOrder = 'name-asc' | 'name-desc' | 'created-asc' | 'created-desc' | 'modified-desc';
 

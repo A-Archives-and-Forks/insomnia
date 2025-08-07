@@ -214,6 +214,26 @@ async function renderApp() {
             action: async args => (await import('./routes/settings.update')).action(args),
           },
           {
+            path: 'cloud-credential',
+            children: [
+              {
+                path: 'new',
+                action: async (...args) =>
+                  (await import('./routes/cloud-credentials-action')).createCloudCredentialAction(...args),
+              },
+              {
+                path: ':cloudCredentialId/update',
+                action: async (...args) =>
+                  (await import('./routes/cloud-credentials-action')).updateCloudCredentialAction(...args),
+              },
+              {
+                path: ':cloudCredentialId/delete',
+                action: async (...args) =>
+                  (await import('./routes/cloud-credentials-action')).deleteCloudCredentialAction(...args),
+              },
+            ],
+          },
+          {
             path: 'untracked-projects',
             loader: async (...args) => (await import('./routes/untracked-projects')).loader(...args),
           },

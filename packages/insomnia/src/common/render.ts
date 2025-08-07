@@ -24,6 +24,7 @@ import type {
   RenderContextAncestor,
   RenderContextOptions,
   RenderedRequest,
+  RenderInputType,
 } from '../templating/types';
 import * as templatingUtils from '../templating/utils';
 import { maskOrDecryptVaultDataIfNecessary } from '../templating/utils';
@@ -228,12 +229,7 @@ export async function buildRenderContext({
 
   return finalRenderContext;
 }
-const renderInThisProcess = async (input: {
-  input: string;
-  context: BaseRenderContext;
-  path: string;
-  ignoreUndefinedEnvVariable: boolean;
-}) => {
+const renderInThisProcess = async (input: RenderInputType) => {
   return templating.render(input.input, {
     context: input.context,
     path: input.path,
