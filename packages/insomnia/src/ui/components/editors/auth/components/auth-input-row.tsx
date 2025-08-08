@@ -1,13 +1,19 @@
 import React, { type ComponentProps, type FC, type ReactNode, useCallback, useEffect, useRef } from 'react';
-import { useRouteLoaderData } from 'react-router';
-import { useToggle } from 'react-use';
+import * as reactUse from 'react-use';
+
+import { useRootLoaderData } from '~/root';
+import { OneLineEditor, type OneLineEditorHandle } from '~/ui/components/.client/codemirror/one-line-editor';
 
 import { toKebabCase } from '../../../../../common/misc';
+import {
+  type RequestLoaderData,
+  useRequestLoaderData,
+} from '../../../../../routes/organization.$organizationId.project.$projectId.workspace.$workspaceId.debug.request.$requestId';
+import {
+  type RequestGroupLoaderData,
+  useRequestGroupLoaderData,
+} from '../../../../../routes/organization.$organizationId.project.$projectId.workspace.$workspaceId.debug.request-group.$requestGroupId';
 import { useRequestGroupPatcher, useRequestPatcher } from '../../../../hooks/use-request';
-import type { RequestLoaderData } from '../../../../routes/$organizationId.project.$projectId.workspace.$workspaceId.debug.request.$requestId';
-import type { RequestGroupLoaderData } from '../../../../routes/$organizationId.project.$projectId.workspace.$workspaceId.debug.request-group.$requestGroupId';
-import { useRootLoaderData } from '../../../../routes/root';
-import { OneLineEditor, type OneLineEditorHandle } from '../../../codemirror/one-line-editor';
 import { AuthRow } from './auth-row';
 
 interface Props extends Pick<ComponentProps<typeof OneLineEditor>, 'getAutocompleteConstants'> {
@@ -30,15 +36,15 @@ export const AuthInputRow: FC<Props> = ({
   overrideValueWhenDisabled,
   copyBtn = false,
 }) => {
-  const { settings } = useRootLoaderData();
+  const { settings } = useRootLoaderData()!;
   const { showPasswords } = settings;
-  const reqData = useRouteLoaderData('request/:requestId') as RequestLoaderData;
-  const groupData = useRouteLoaderData('request-group/:requestGroupId') as RequestGroupLoaderData;
+  const reqData = useRequestLoaderData() as RequestLoaderData;
+  const groupData = useRequestGroupLoaderData() as RequestGroupLoaderData;
   const patchRequest = useRequestPatcher();
   const patchRequestGroup = useRequestGroupPatcher();
-  const { authentication, _id } = reqData?.activeRequest || groupData.activeRequestGroup;
+  const { authentication, _id } = reqData?.activeRequest || groupData?.activeRequestGroup || {};
   const patcher = reqData ? patchRequest : patchRequestGroup;
-  const [masked, toggleMask] = useToggle(true);
+  const [masked, toggleMask] = reactUse.useToggle(true);
   const canBeMasked = !showPasswords && mask;
   const isMasked = canBeMasked && masked;
 

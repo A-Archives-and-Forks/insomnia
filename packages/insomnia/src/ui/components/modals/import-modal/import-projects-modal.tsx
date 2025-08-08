@@ -3,22 +3,23 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { type DirectoryDropItem, type FileDropItem, OverlayContainer, useDrop } from 'react-aria';
 import { Label, ProgressBar } from 'react-aria-components';
 import { useNavigate, useParams, useRevalidator } from 'react-router';
-import { useLatest } from 'react-use';
+import * as reactUse from 'react-use';
 
-import { database } from '../../../../common/database';
-import type { ScanResult } from '../../../../common/import';
-import { selectFileOrFolder } from '../../../../common/select-file-or-folder';
-import * as models from '../../../../models';
-import type { Project } from '../../../../models/project';
-import { createProject } from '../../../routes/$organizationId.project.new';
-import { importScannedResources } from '../../../routes/import.resources';
-import { scanImportResources } from '../../../routes/import.scan';
-import { useOrganizationLoaderData } from '../../../routes/organization';
-import { Checkbox } from '../../base/checkbox';
-import { Modal, type ModalHandle } from '../../base/modal';
-import { ModalHeader } from '../../base/modal-header';
-import { Icon } from '../../icon';
-import { Button } from '../../themed-button';
+import { database } from '~/common/database';
+import type { ScanResult } from '~/common/import';
+import { selectFileOrFolder } from '~/common/select-file-or-folder';
+import * as models from '~/models';
+import type { Project } from '~/models/project';
+import { importScannedResources } from '~/routes/import.resources';
+import { scanImportResources } from '~/routes/import.scan';
+import { useOrganizationLoaderData } from '~/routes/organization';
+import { createProject } from '~/routes/organization.$organizationId.project.new';
+import { Checkbox } from '~/ui/components/base/checkbox';
+import { Modal, type ModalHandle } from '~/ui/components/base/modal';
+import { ModalHeader } from '~/ui/components/base/modal-header';
+import { Icon } from '~/ui/components/icon';
+import { Button } from '~/ui/components/themed-button';
+
 import { showModal } from '..';
 import { AlertModal } from '../alert-modal';
 import { disclaimer, ScanResultsTable, SupportedFormats, validImportExtensions } from './shared';
@@ -520,7 +521,7 @@ export const ImportProjectsModal = ({ organizationId, onHide }: { organizationId
   );
   const [processingCancelled, setProcessingCancelled] = useState(false);
   const [processingError, setProcessingError] = useState<string | null>(null);
-  const latestProcessingCancelled = useLatest(processingCancelled);
+  const latestProcessingCancelled = reactUse.useLatest(processingCancelled);
 
   // We should use an abort controller to cancel the import process, but currently the import process is not immediate cancelable, so fall back to a flag.
   const unmountRef = useRef(false);

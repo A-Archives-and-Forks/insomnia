@@ -1,5 +1,4 @@
 import React, { type ChangeEvent, type FC, type ReactNode, useEffect, useMemo, useState } from 'react';
-import { useRouteLoaderData } from 'react-router';
 
 import { type AUTH_OAUTH_2, getOauthRedirectUrl } from '../../../../common/constants';
 import { toKebabCase } from '../../../../common/misc';
@@ -18,9 +17,15 @@ import {
 } from '../../../../network/o-auth-2/constants';
 import { getOAuth2Token } from '../../../../network/o-auth-2/get-token';
 import { initNewOAuthSession } from '../../../../network/o-auth-2/get-token';
+import {
+  type RequestLoaderData,
+  useRequestLoaderData,
+} from '../../../../routes/organization.$organizationId.project.$projectId.workspace.$workspaceId.debug.request.$requestId';
+import {
+  type RequestGroupLoaderData,
+  useRequestGroupLoaderData,
+} from '../../../../routes/organization.$organizationId.project.$projectId.workspace.$workspaceId.debug.request-group.$requestGroupId';
 import { useNunjucks } from '../../../context/nunjucks/use-nunjucks';
-import type { RequestLoaderData } from '../../../routes/$organizationId.project.$projectId.workspace.$workspaceId.debug.request.$requestId';
-import type { RequestGroupLoaderData } from '../../../routes/$organizationId.project.$projectId.workspace.$workspaceId.debug.request-group.$requestGroupId';
 import { Link } from '../../base/link';
 import { showModal } from '../../modals';
 import { ResponseDebugModal } from '../../modals/response-debug-modal';
@@ -274,8 +279,8 @@ const getFieldsForGrantType = (authentication: Extract<RequestAuthentication, { 
 };
 
 export const OAuth2Auth: FC = () => {
-  const reqData = useRouteLoaderData('request/:requestId') as RequestLoaderData;
-  const groupData = useRouteLoaderData('request-group/:requestGroupId') as RequestGroupLoaderData;
+  const reqData = useRequestLoaderData() as RequestLoaderData;
+  const groupData = useRequestGroupLoaderData() as RequestGroupLoaderData;
   const { authentication } = reqData?.activeRequest || groupData.activeRequestGroup;
 
   const { basic, advanced } = getFieldsForGrantType(authentication as AuthTypeOAuth2);
@@ -373,8 +378,8 @@ const OAuth2TokenInput: FC<{
   label: string;
   property: keyof Pick<OAuth2Token, 'accessToken' | 'refreshToken' | 'identityToken'>;
 }> = ({ token, label, property }) => {
-  const reqData = useRouteLoaderData('request/:requestId') as RequestLoaderData;
-  const groupData = useRouteLoaderData('request-group/:requestGroupId') as RequestGroupLoaderData;
+  const reqData = useRequestLoaderData() as RequestLoaderData;
+  const groupData = useRequestGroupLoaderData() as RequestGroupLoaderData;
   const { _id } = reqData?.activeRequest || groupData.activeRequestGroup;
   const onChange = async ({ currentTarget: { value } }: ChangeEvent<HTMLInputElement>) => {
     if (token) {
@@ -451,8 +456,8 @@ const OAuth2Error: FC<{ token: OAuth2Token | null }> = ({ token }) => {
 };
 
 const OAuth2Tokens: FC = () => {
-  const reqData = useRouteLoaderData('request/:requestId') as RequestLoaderData;
-  const groupData = useRouteLoaderData('request-group/:requestGroupId') as RequestGroupLoaderData;
+  const reqData = useRequestLoaderData() as RequestLoaderData;
+  const groupData = useRequestGroupLoaderData() as RequestGroupLoaderData;
   const { authentication, _id } = reqData?.activeRequest || groupData.activeRequestGroup;
   const [token, setToken] = useState<OAuth2Token | null>(null);
   useEffect(() => {

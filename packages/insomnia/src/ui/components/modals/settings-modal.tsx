@@ -1,8 +1,9 @@
 import React, { forwardRef, useImperativeHandle, useRef, useState } from 'react';
 import { Tab, TabList, TabPanel, Tabs } from 'react-aria-components';
 
+import { useRootLoaderData } from '~/root';
+
 import { getAppVersion, getProductName } from '../../../common/constants';
-import { useRootLoaderData } from '../../routes/root';
 import { Modal, type ModalHandle, type ModalProps } from '../base/modal';
 import { ModalBody } from '../base/modal-body';
 import { ModalHeader } from '../base/modal-header';
@@ -31,7 +32,7 @@ export const TAB_CLOUD_CREDENTIAL = 'cloudCred';
 
 export const SettingsModal = forwardRef<SettingsModalHandle, ModalProps>((props, ref) => {
   const [defaultTabKey, setDefaultTabKey] = useState('general');
-  const { userSession, settings } = useRootLoaderData();
+  const { userSession, settings } = useRootLoaderData()!;
   const modalRef = useRef<ModalHandle>(null);
   const [keyboardClosable, setKeyboardClosable] = useState(true);
 

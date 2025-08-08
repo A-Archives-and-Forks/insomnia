@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { Button, Menu, MenuItem, MenuTrigger, Popover } from 'react-aria-components';
-import { useFetcher } from 'react-router';
+
+import { useRootLoaderData } from '~/root';
+import { useDeleteCloudCredentialActionFetcher } from '~/routes/cloud-credentials.$cloudCredentialId.delete';
 
 import { EXTERNAL_VAULT_PLUGIN_NAME } from '../../../common/constants';
 import {
@@ -12,7 +14,6 @@ import {
 import { executePluginMainAction } from '../../../plugins';
 import { getBundlePlugins } from '../../../plugins';
 import { usePlanData } from '../../hooks/use-plan';
-import { useRootLoaderData } from '../../routes/root';
 import { Icon } from '../icon';
 import { showError, showModal } from '../modals';
 import { AskModal } from '../modals/ask-modal';
@@ -55,7 +56,7 @@ const externalVaultPluginName = EXTERNAL_VAULT_PLUGIN_NAME;
 
 export const CloudServiceCredentialList = () => {
   const { isOwner, isEnterprisePlan } = usePlanData();
-  const { cloudCredentials } = useRootLoaderData();
+  const { cloudCredentials } = useRootLoaderData()!;
   const [modalState, setModalState] = useState<{
     show: boolean;
     provider: CloudProviderName;
@@ -63,7 +64,7 @@ export const CloudServiceCredentialList = () => {
     authUrl?: string;
   }>();
   const [isVaultPluginInstalled, setIsVaultPluginInstalled] = useState(false);
-  const deleteCredentialFetcher = useFetcher();
+  const deleteCredentialFetcher = useDeleteCloudCredentialActionFetcher();
   useEffect(() => {
     const checkVaultPlugin = async () => {
       const plugins = await getBundlePlugins();
@@ -79,13 +80,9 @@ export const CloudServiceCredentialList = () => {
       message: `Are you sure to delete ${name}?`,
       onDone: async (isYes: boolean) => {
         if (isYes) {
-          deleteCredentialFetcher.submit(
-            {},
-            {
-              action: `/cloud-credential/${id}/delete`,
-              method: 'delete',
-            },
-          );
+          deleteCredentialFetcher.submit({
+            cloudCredentialId: id,
+          });
         }
       },
     });

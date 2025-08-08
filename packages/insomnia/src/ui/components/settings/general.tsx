@@ -1,5 +1,7 @@
 import React, { type FC, Fragment } from 'react';
 
+import { useRootLoaderData } from '~/root';
+
 import {
   EditorKeyMap,
   isMac,
@@ -13,7 +15,6 @@ import { docsKeyMaps } from '../../../common/documentation';
 import { type HttpVersion, HttpVersions, UpdateChannel } from '../../../common/settings';
 import { strings } from '../../../common/strings';
 import { initNewOAuthSession } from '../../../network/o-auth-2/get-token';
-import { useRootLoaderData } from '../../routes/root';
 import { Link } from '../base/link';
 import { CheckForUpdatesButton } from '../check-for-updates-button';
 import { BooleanSetting } from './boolean-setting';
@@ -23,7 +24,7 @@ import { TextSetting } from './text-setting';
 import { VaultKeyPanel } from './vault-key-panel';
 
 export const General: FC = () => {
-  const { settings, userSession } = useRootLoaderData();
+  const { settings, userSession } = useRootLoaderData()!;
   const isLoggedIn = Boolean(userSession.id);
 
   return (

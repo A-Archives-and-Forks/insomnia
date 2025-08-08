@@ -1,8 +1,5 @@
-import childProcess from 'node:child_process';
-import { cp, mkdir, rm } from 'node:fs/promises';
+import { cp, mkdir } from 'node:fs/promises';
 import path from 'node:path';
-
-import * as vite from 'vite';
 
 import buildMainAndPreload from '../esbuild.main';
 
@@ -21,8 +18,7 @@ if (require.main === module) {
 export const start = async () => {
   console.log('[build] Starting build');
 
-  console.log(`[build] npm: ${childProcess.spawnSync('npm', ['--version']).stdout}`.trim());
-  console.log(`[build] node: ${childProcess.spawnSync('node', ['--version']).stdout}`.trim());
+  console.log(`[build] node: ${process.version}`.trim());
 
   if (process.version.indexOf('v22.') !== 0) {
     console.log('[build] Node 22.x.x is required to build');
@@ -31,19 +27,9 @@ export const start = async () => {
 
   const buildFolder = path.join('../build');
 
-  // Remove folders first
-  console.log('[build] Removing existing directories');
-  await rm(path.resolve(__dirname, buildFolder), { recursive: true, force: true });
-
   console.log('[build] Building main.min.js and preload');
   await buildMainAndPreload({
     mode: 'production',
-  });
-
-  console.log('[build] Building renderer');
-
-  await vite.build({
-    configFile: path.join(__dirname, '..', 'vite.config.ts'),
   });
 
   // Copy necessary files
@@ -58,6 +44,7 @@ export const start = async () => {
   await copyFiles('../src/static', path.join(buildFolder, 'static'));
   await copyFiles('../src/icons', buildFolder);
   await copyFiles('../src/main/lint-process.mjs', path.join(buildFolder, 'main/lint-process.mjs'));
+  await copyFiles('../src/hidden-window.html', path.join(buildFolder, 'hidden-window.html'));
 
   console.log('[build] Complete!');
 };
