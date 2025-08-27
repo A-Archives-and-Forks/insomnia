@@ -9,7 +9,6 @@ import {
   EXPORT_TYPE_PROTO_FILE,
   EXPORT_TYPE_REQUEST,
   EXPORT_TYPE_REQUEST_GROUP,
-  EXPORT_TYPE_RUNNER_TEST_RESULT,
   EXPORT_TYPE_SOCKETIO_PAYLOAD,
   EXPORT_TYPE_SOCKETIO_REQUEST,
   EXPORT_TYPE_UNIT_TEST,
@@ -163,6 +162,8 @@ export function types() {
   return all().map(model => model.type);
 }
 
+export type ModelTypes = ReturnType<typeof types>;
+
 export function canSync(d: BaseModel) {
   if (d.isPrivate) {
     return false;
@@ -241,7 +242,7 @@ export async function initModel<T extends BaseModel>(type: string, ...sources: R
   return migratedDoc as T;
 }
 
-export const MODELS_BY_EXPORT_TYPE: Record<string, any> = {
+export const MODELS_BY_EXPORT_TYPE: Record<string, ReturnType<typeof all>[number]> = {
   [EXPORT_TYPE_REQUEST]: request,
   [EXPORT_TYPE_WEBSOCKET_PAYLOAD]: webSocketPayload,
   [EXPORT_TYPE_WEBSOCKET_REQUEST]: webSocketRequest,
@@ -250,8 +251,6 @@ export const MODELS_BY_EXPORT_TYPE: Record<string, any> = {
   [EXPORT_TYPE_MOCK_SERVER]: mockServer,
   [EXPORT_TYPE_MOCK_ROUTE]: mockRoute,
   [EXPORT_TYPE_GRPC_REQUEST]: grpcRequest,
-  // @TODO Maybe we don't need this to be exported
-  [EXPORT_TYPE_RUNNER_TEST_RESULT]: runnerTestResult,
   [EXPORT_TYPE_REQUEST_GROUP]: requestGroup,
   [EXPORT_TYPE_UNIT_TEST_SUITE]: unitTestSuite,
   [EXPORT_TYPE_UNIT_TEST]: unitTest,
@@ -263,25 +262,93 @@ export const MODELS_BY_EXPORT_TYPE: Record<string, any> = {
   [EXPORT_TYPE_PROTO_DIRECTORY]: protoDirectory,
 };
 
-export const WORKSPACE_EXPORT_TYPES_DESCENDANT_MAP: Record<string, string[]> = {
-  [workspace.type]: [
-    requestGroup.type,
-    request.type,
-    grpcRequest.type,
-    webSocketRequest.type,
-    socketIORequest.type,
-    cookieJar.type,
-    environment.type,
-    apiSpec.type,
-    mockServer.type,
-    unitTestSuite.type,
-    protoDirectory.type,
-    protoFile.type,
-  ],
-  [requestGroup.type]: [requestGroup.type, request.type, grpcRequest.type, webSocketRequest.type, socketIORequest.type],
-  [webSocketRequest.type]: [webSocketPayload.type],
-  [mockServer.type]: [mockRoute.type],
-  [environment.type]: [environment.type],
-  [unitTestSuite.type]: [unitTest.type],
-  [protoDirectory.type]: [protoFile.type],
+export const EXPORTABLE_TYPES = Object.values(MODELS_BY_EXPORT_TYPE).map(m => m.type);
+
+// Use function instead of object to avoid issues with circular dependencies
+export const getAllDescendantMap = (): Record<string, string[]> => {
+  return {
+    [workspace.type]: [
+      requestGroup.type,
+      request.type,
+      grpcRequest.type,
+      webSocketRequest.type,
+      socketIORequest.type,
+      cookieJar.type,
+      environment.type,
+      apiSpec.type,
+      mockServer.type,
+      unitTestSuite.type,
+      protoDirectory.type,
+      protoFile.type,
+      workspaceMeta.type,
+      runnerTestResult.type,
+      caCertificate.type,
+      clientCertificate.type,
+    ],
+    [requestGroup.type]: [
+      requestGroup.type,
+      request.type,
+      grpcRequest.type,
+      webSocketRequest.type,
+      socketIORequest.type,
+      runnerTestResult.type,
+      requestGroupMeta.type,
+      oAuth2Token.type,
+    ],
+    [request.type]: [requestMeta.type, response.type, requestVersion.type, oAuth2Token.type],
+    [grpcRequest.type]: [grpcRequestMeta.type],
+    [webSocketRequest.type]: [webSocketPayload.type, webSocketResponse.type, requestMeta.type],
+    [socketIORequest.type]: [socketIOPayload.type, socketIOResponse.type, requestMeta.type],
+    [mockServer.type]: [mockRoute.type],
+    [environment.type]: [environment.type],
+    [unitTestSuite.type]: [unitTest.type, unitTestResult.type],
+    [unitTest.type]: [unitTestResult.type],
+    [protoDirectory.type]: [protoDirectory.type, protoFile.type],
+  };
+};
+
+let childToParentMap: Record<string, string[]> | undefined = undefined;
+
+const getChildToParentMap = () => {
+  if (childToParentMap) {
+    return childToParentMap;
+  }
+  const childToParents: Record<string, string[]> = {};
+  for (const [parent, children] of Object.entries(getAllDescendantMap())) {
+    for (const child of children) {
+      if (!childToParents[child]) childToParents[child] = [];
+      childToParents[child].push(parent);
+    }
+  }
+  childToParentMap = childToParents;
+  return childToParents;
+};
+
+export const generateDescendantMap = (queryTypes: ModelTypes): Record<string, string[]> => {
+  const result: Record<string, string[]> = {};
+
+  const visited = new Set<string>();
+  const collectAncestors = (child: string) => {
+    if (!child || visited.has(child)) {
+      return;
+    }
+    visited.add(child);
+    const parentMap = getChildToParentMap();
+    const parents = parentMap[child];
+    if (parents?.length) {
+      for (const p of parents) {
+        if (!result[p]) {
+          result[p] = [];
+        }
+        result[p].push(child);
+        collectAncestors(p);
+      }
+    }
+  };
+
+  for (const type of queryTypes) {
+    collectAncestors(type);
+  }
+
+  return result;
 };
