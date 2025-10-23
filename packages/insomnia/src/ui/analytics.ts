@@ -9,7 +9,10 @@ export enum SegmentEvent {
   importScanned = 'Import Scanned',
   importCompleted = 'Import Completed',
   documentCreate = 'Document Created',
+  mockCreateModalOpened = 'Mock Server Create Modal Opened',
   mockCreate = 'Mock Created',
+  mockEdit = 'Mock Server Edited',
+  mockDelete = 'Mock Server Deleted',
   mockRouteCreate = 'Mock Route Created',
   mockRouteEdit = 'Mock Route Edited',
   mockRouteDelete = 'Mock Route Deleted',
@@ -47,6 +50,10 @@ export enum SegmentEvent {
   projectUpdated = 'Project Updated',
   exportStarted = 'Export Started',
   exportRequestsChosen = 'Export Requests Chosen',
+  recommendCommitsGenerated = 'Recommend Commits Generated',
+  recommendCommitsSaved = 'Recommend Commits Saved',
+  recommendCommitsCancelled = 'Recommend Commits Cancelled',
+  recommendCommitsClicked = 'Recommend Commits Clicked',
 }
 
 type PushPull = 'push' | 'pull';

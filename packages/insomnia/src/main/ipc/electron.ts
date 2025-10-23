@@ -1,3 +1,5 @@
+import { mkdirSync } from 'node:fs';
+
 import type {
   IpcMainEvent,
   IpcMainInvokeEvent,
@@ -22,6 +24,8 @@ export type HandleChannels =
   | 'authorizeUserInWindow'
   | 'backup'
   | 'cancelAuthorizationInDefaultBrowser'
+  | 'generateMockRouteDataFromSpec'
+  | 'generateCommitsFromDiff'
   | 'curl.event.findMany'
   | 'curl.open'
   | 'curl.readyState'
@@ -35,6 +39,7 @@ export type HandleChannels =
   | 'git.cloneGitRepo'
   | 'git.commitAndPushToGitRepo'
   | 'git.commitToGitRepo'
+  | 'git.multipleCommitToGitRepo'
   | 'git.completeSignInToGitHub'
   | 'git.completeSignInToGitLab'
   | 'git.continueMerge'
@@ -52,6 +57,7 @@ export type HandleChannels =
   | 'git.gitFetchAction'
   | 'git.gitLogLoader'
   | 'git.gitStatus'
+  | 'git.diff'
   | 'git.initGitRepoClone'
   | 'git.initSignInToGitHub'
   | 'git.initSignInToGitLab'
@@ -70,10 +76,21 @@ export type HandleChannels =
   | 'grpc.loadMethodsFromReflection'
   | 'installPlugin'
   | 'lintSpec'
+  | 'llm.getActiveBackend'
+  | 'llm.setActiveBackend'
+  | 'llm.clearActiveBackend'
+  | 'llm.getBackendConfig'
+  | 'llm.updateBackendConfig'
+  | 'llm.getAllConfigurations'
+  | 'llm.getCurrentConfig'
+  | 'llm.getAIFeatureEnabled'
+  | 'llm.setAIFeatureEnabled'
   | 'onDefaultBrowserOAuthRedirect'
   | 'open-channel-to-hidden-browser-window'
   | 'parseImport'
+  | 'openPath'
   | 'readCurlResponse'
+  | 'readOrCreateDataDir'
   | 'readDir'
   | 'insecureReadFile'
   | 'insecureReadFileWithEncoding'
@@ -304,6 +321,11 @@ export function registerElectronHandlers() {
 
   ipcMainOn('showItemInFolder', (_, name: string) => {
     shell.showItemInFolder(name);
+  });
+
+  ipcMainHandle('openPath', async (_, name: string) => {
+    mkdirSync(name, { recursive: true });
+    return shell.openPath(name);
   });
 
   ipcMainOn('readText', event => {
