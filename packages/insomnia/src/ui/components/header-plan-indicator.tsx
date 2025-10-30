@@ -87,7 +87,7 @@ export const HeaderPlanIndicator = ({ isMinimal }: Props) => {
   const userTip =
     userStatus === 'error'
       ? 'You have reached your limit of licensed users. Invite more by Upgrading your plan.'
-      : 'This number represents the amount of licensed users are in your plan.';
+      : 'The number of users currently consuming a license within your account.';
 
   return (
     <DialogTrigger isOpen={open} onOpenChange={setOpen}>
@@ -123,7 +123,7 @@ export const HeaderPlanIndicator = ({ isMinimal }: Props) => {
                   className="rounded-sm border border-solid border-[--hl-md] px-4 py-1 text-sm text-[--color-font] ring-1 ring-transparent transition-all hover:bg-[--hl-xs] hover:bg-opacity-80 focus:ring-inset focus:ring-[--hl-md] aria-pressed:bg-[--hl-sm]"
                   href={
                     isEssential
-                      ? getAppWebsiteBaseURL() + '/app/pricing'
+                      ? getAppWebsiteBaseURL() + '/app/pricing?source=app_topbar'
                       : getAppWebsiteBaseURL() + '/app/subscription/update?plan=enterprise&source=app_topbar'
                   }
                 >
@@ -159,7 +159,7 @@ export const HeaderPlanIndicator = ({ isMinimal }: Props) => {
                     <span className="capitalize">Unmanaged users</span>
                     <Tooltip
                       position="bottom"
-                      message="This number represents the amount of free users are in your plan."
+                      message="The number of open source users from your verified domains, not currently attached to your account."
                     >
                       <Icon icon="info-circle" className="ml-2" />
                     </Tooltip>
