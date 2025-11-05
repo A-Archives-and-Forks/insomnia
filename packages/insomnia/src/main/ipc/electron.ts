@@ -125,6 +125,9 @@ export type HandleChannels =
   | 'mcp.notification.rootListChange'
   | 'mcp.readyState'
   | 'mcp.event.findMany'
+  | 'mcp.event.findNotifications'
+  | 'mcp.notification.rootListChange'
+  | 'mcp.client.hasRequestResponded'
   | 'mcp.close';
 
 export const ipcMainHandle = (
@@ -169,6 +172,7 @@ export type MainOnChannels =
   | 'webSocket.close'
   | 'webSocket.closeAll'
   | 'mcp.closeAll'
+  | 'mcp.client.responseElicitationRequest'
   | 'mcp.sendMCPRequest'
   | 'writeText';
 

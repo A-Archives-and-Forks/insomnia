@@ -1,15 +1,17 @@
 import fs from 'node:fs';
 
+import classnames from 'classnames';
 import React, { type FC, useEffect, useMemo, useState } from 'react';
 import { Button, Input, SearchField, Tab, TabList, TabPanel, Tabs } from 'react-aria-components';
 import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels';
 
 import { useMcpReadyState } from '~/ui/hooks/use-mcp-ready-state';
+import { useRealtimeConnectionNotifications } from '~/ui/hooks/use-realtime-connection-notifications';
 
 import { getSetCookieHeaders } from '../../../common/misc';
+import type { McpEvent } from '../../../main/mcp/types';
 import type { CurlEvent } from '../../../main/network/curl';
 import type { ResponseTimelineEntry } from '../../../main/network/libcurl-promise';
-import type { McpEvent } from '../../../main/network/mcp';
 import type { SocketIOEvent } from '../../../main/network/socket-io';
 import type { WebSocketEvent } from '../../../main/network/websocket';
 import { TRANSPORT_TYPES } from '../../../models/mcp-request';
@@ -64,6 +66,7 @@ export const RealtimeResponsePane: FC<{ requestId?: string }> = () => {
 
 type ResponseType = WebSocketResponse | Response | SocketIOResponse | McpResponse;
 type EventType = CurlEvent | WebSocketEvent | SocketIOEvent | McpEvent;
+type ReadyState = 'disconnected' | 'connecting' | 'connected';
 interface RealtimeActiveResponsePaneProps {
   response: ResponseType;
   responses: ResponseType[];
@@ -93,7 +96,7 @@ const RealTimeActiveResponsePaneForMcp: FC<RealtimeActiveResponsePaneProps> = pr
   const { response } = props;
   const requestId = response.parentId;
   const readyState = useMcpReadyState({ requestId });
-  return <RealtimeActiveResponsePane {...props} connected={readyState === 'connected'} />;
+  return <RealtimeActiveResponsePane {...props} readyState={readyState} />;
 };
 
 const RealTimeActiveResponsePaneForOthers: FC<
@@ -102,21 +105,22 @@ const RealTimeActiveResponsePaneForOthers: FC<
   const { response, protocol } = props;
   const requestId = response.parentId;
   const readyState = useReadyState({ requestId, protocol });
-  return <RealtimeActiveResponsePane {...props} connected={readyState} />;
+  return <RealtimeActiveResponsePane {...props} readyState={readyState ? 'connected' : 'disconnected'} />;
 };
 
-const RealtimeActiveResponsePane: FC<RealtimeActiveResponsePaneProps & { connected: boolean }> = ({
+const RealtimeActiveResponsePane: FC<RealtimeActiveResponsePaneProps & { readyState: ReadyState }> = ({
   response,
   responses,
   requestVersions,
   autoSelectLatestEvent,
-  connected,
+  readyState,
 }) => {
   const [selectedEvent, setSelectedEvent] = useState<EventType | null>(null);
   const [timeline, setTimeline] = useState<ResponseTimelineEntry[]>([]);
   const [clearEventsBefore, setClearEventsBefore] = useState<number | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [eventType, setEventType] = useState<CurlEvent['type']>();
+  const isConnected = readyState === 'connected';
 
   const protocol = useMemo(() => {
     if (isSocketIOResponse(response)) {
@@ -129,6 +133,7 @@ const RealtimeActiveResponsePane: FC<RealtimeActiveResponsePaneProps & { connect
   }, [response]);
 
   const allEvents = useRealtimeConnectionEvents({ responseId: response._id, protocol }) as EventType[];
+  const allNotifications = useRealtimeConnectionNotifications({ responseId: response._id, protocol });
   const handleSelection = (event: EventType) => {
     setSelectedEvent((selected: EventType | null) => (selected?._id === event._id ? null : event));
   };
@@ -152,11 +157,6 @@ const RealtimeActiveResponsePane: FC<RealtimeActiveResponsePaneProps & { connect
 
         // Filter out events that don't match the selected event type
         if (eventType && event.type !== eventType) {
-          return false;
-        }
-
-        // Filter out MCP notification events which will show on another tab
-        if (event.type === 'notification') {
           return false;
         }
 
@@ -195,8 +195,6 @@ const RealtimeActiveResponsePane: FC<RealtimeActiveResponsePaneProps & { connect
       setSelectedEvent(events[0]);
     }
   }, [events, autoSelectLatestEvent]);
-
-  const notificationEvents = useMemo(() => allEvents.filter(event => event.type === 'notification'), [allEvents]);
 
   useEffect(() => {
     setSelectedEvent(null);
@@ -242,8 +240,15 @@ const RealtimeActiveResponsePane: FC<RealtimeActiveResponsePaneProps & { connect
       <PaneHeader className="row-spaced">
         <div className="no-wrap scrollable scrollable--no-bars pad-left">
           {isLongRunning ? (
-            <div data-testid="response-status-tag" className={`${connected ? 'bg-success' : 'bg-danger'} px-2 py-1`}>
-              {connected ? 'Connected' : 'Disconnected'}
+            <div
+              data-testid="response-status-tag"
+              className={classnames('px-2 py-1 capitalize', {
+                'bg-success': readyState === 'connected',
+                'bg-info': readyState === 'connecting',
+                'bg-danger': readyState === 'disconnected',
+              })}
+            >
+              {readyState}
             </div>
           ) : (
             <>
@@ -272,9 +277,9 @@ const RealtimeActiveResponsePane: FC<RealtimeActiveResponsePaneProps & { connect
               id="notifications"
             >
               Notifications
-              {notificationEvents.length > 0 && (
+              {allNotifications.length > 0 && (
                 <span className="shadow-small flex aspect-square items-center justify-between overflow-hidden rounded-lg border border-solid border-[--hl-md] p-2 text-xs">
-                  {notificationEvents.length}
+                  {allNotifications.length}
                 </span>
               )}
             </Tab>
@@ -374,6 +379,8 @@ const RealtimeActiveResponsePane: FC<RealtimeActiveResponsePaneProps & { connect
                       onSelect={handleSelection}
                       selectionId={selectedEvent?._id}
                       autoSelectLatestEvent
+                      protocol={protocol}
+                      readyState={isConnected}
                     />
                   )}
                 </Panel>
@@ -391,7 +398,7 @@ const RealtimeActiveResponsePane: FC<RealtimeActiveResponsePaneProps & { connect
         </TabPanel>
         {isMcpResponse(response) && (
           <TabPanel className="flex w-full flex-1 flex-col overflow-hidden" id="notifications">
-            <McpNotificationTab allEvents={notificationEvents} />
+            <McpNotificationTab allEvents={allNotifications} />
           </TabPanel>
         )}
         {!isSocketIOResponse(response) && (
