@@ -8,6 +8,7 @@ import {
   ListRootsResultSchema,
 } from '@modelcontextprotocol/sdk/types.js';
 import { BrowserWindow } from 'electron';
+import { Agent } from 'undici';
 import { v4 as uuidV4 } from 'uuid';
 
 import { REALTIME_EVENTS_CHANNELS } from '~/common/constants';
@@ -29,6 +30,7 @@ import type {
   McpReadyState,
   McpRequestEventWithoutBase,
 } from '~/main/mcp/types';
+import { insecureReadFile } from '~/main/secure-read-file';
 import * as models from '~/models';
 import { invariant } from '~/utils/invariant';
 
@@ -299,4 +301,20 @@ export const cancelRequest = async (options: { messageId: string } & CommonMcpOp
       abortControllersForRequest.delete(messageId);
     }
   }
+};
+
+// To support MCP requests with custom CA certificates
+export const getFetchDispatcher = async (requestId: string) => {
+  const mcpRequest = await models.mcpRequest.getById(requestId);
+  invariant(mcpRequest, 'McpRequest not found');
+  const workspaceId = mcpRequest.parentId;
+  const workspaceCaCert = await models.caCertificate.findByParentId(workspaceId);
+
+  return new Agent({
+    connect: {
+      ...(workspaceCaCert?.path && !workspaceCaCert?.disabled
+        ? { ca: await insecureReadFile(workspaceCaCert.path) }
+        : {}),
+    },
+  });
 };
