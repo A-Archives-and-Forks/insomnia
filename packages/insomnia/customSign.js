@@ -13,8 +13,8 @@ exports.default = async function (configuration) {
     return;
   }
 
-  const { SM_KEYPAIR_ALIAS } = process.env;
-  if (!SM_KEYPAIR_ALIAS) {
+  const { SM_KEYPAIR_ALIAS,SM_API_KEY,SM_CLIENT_CERT_PASSWORD } = process.env;
+  if (!SM_KEYPAIR_ALIAS|| !SM_API_KEY || !SM_CLIENT_CERT_PASSWORD) {
     console.log('[customSign] Skipping signing,  Missing required environment variable: SM_KEYPAIR_ALIAS');
     return;
   }
@@ -25,7 +25,8 @@ exports.default = async function (configuration) {
   console.log('[customSign] File to sign before final packaging:', rawPath);
   const absolutePath = path.resolve(rawPath); // C:\Users\...\Update.exe
   const fixedAbsolutePath = absolutePath.replace(/\\/g, '/'); // C:/Users/.../Update.exe
-  const smctlSignCommand = `smctl sign --simple --keypair-alias ${SM_KEYPAIR_ALIAS} --input ${fixedAbsolutePath}`;
+  const smctlSignCommand = `smctl credentials save ${SM_API_KEY} ${SM_CLIENT_CERT_PASSWORD} && \
+      smctl sign --simple --keypair-alias ${SM_KEYPAIR_ALIAS} --input ${fixedAbsolutePath}`;
 
   try {
     console.log('[customSign] Starting to run smctl sign cmd...');

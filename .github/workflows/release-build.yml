@@ -39,6 +39,7 @@ jobs:
       INSO_PACKAGE_NAME: insomnia-inso
       INSO_DOCKER_TAR: inso-docker-image.tar
       DIGICERT_SM_CLIENT_CERT_FILE: sm_client_cert.p12
+      DIGICERT_WIN_SM_CLIENT_CERT_FILE: /d/a/insomnia-ee/insomnia-ee/sm_client_cert.p12
     strategy:
       fail-fast: false
       matrix:
@@ -130,12 +131,11 @@ jobs:
         if: runner.os == 'Windows'
         shell: bash
         run: |
-          smctl credentials save ${SM_API_KEY} ${SM_CLIENT_CERT_PASSWORD}
           NODE_OPTIONS='--max_old_space_size=6144' npm run package:windows:unpacked -w insomnia
         env:
           SM_HOST: ${{ vars.DIGICERT_SM_HOST }}
           SM_API_KEY: ${{ secrets.DIGICERT_SM_API_KEY }}
-          SM_CLIENT_CERT_FILE: ${{ env.DIGICERT_SM_CLIENT_CERT_FILE }}
+          SM_CLIENT_CERT_FILE: ${{ env.DIGICERT_WIN_SM_CLIENT_CERT_FILE }}
           SM_CLIENT_CERT_PASSWORD: ${{ secrets.DIGICERT_SM_CLIENT_CERT_PASSWORD }}
           SM_KEYPAIR_ALIAS: ${{ secrets.DIGICERT_KEYPAIR_ALIAS }}
 
@@ -187,7 +187,7 @@ jobs:
         env:
           SM_HOST: ${{ vars.DIGICERT_SM_HOST }}
           SM_API_KEY: ${{ secrets.DIGICERT_SM_API_KEY }}
-          SM_CLIENT_CERT_FILE: ${{ env.DIGICERT_SM_CLIENT_CERT_FILE }}
+          SM_CLIENT_CERT_FILE: ${{ env.DIGICERT_WIN_SM_CLIENT_CERT_FILE }}
           SM_CLIENT_CERT_PASSWORD: ${{ secrets.DIGICERT_SM_CLIENT_CERT_PASSWORD }}
           SM_KEYPAIR_ALIAS: ${{ secrets.DIGICERT_KEYPAIR_ALIAS }}
 
