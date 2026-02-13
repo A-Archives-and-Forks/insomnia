@@ -20,6 +20,7 @@ import {
 } from 'react-aria-components';
 import { useNavigate, useParams } from 'react-router';
 
+import { scopeToBgColorMap, scopeToIconMap, scopeToLabelMap, scopeToTextColorMap } from '~/common/get-workspace-label';
 import { constructKeyCombinationDisplay, getPlatformKeyCombinations } from '~/common/hotkeys';
 import { isGrpcRequest } from '~/models/grpc-request';
 import { isRequest } from '~/models/request';
@@ -28,12 +29,6 @@ import { isWebSocketRequest } from '~/models/websocket-request';
 import { useRootLoaderData } from '~/root';
 import { useCommandsLoaderFetcher } from '~/routes/commands';
 import { useInsomniaSyncPullRemoteFileActionFetcher } from '~/routes/organization.$organizationId.insomnia-sync.pull-remote-file';
-import {
-  scopeToBgColorMap,
-  scopeToIconMap,
-  scopeToLabelMap,
-  scopeToTextColorMap,
-} from '~/routes/organization.$organizationId.project.$projectId._index';
 import { useSetActiveEnvironmentFetcher } from '~/routes/organization.$organizationId.project.$projectId.workspace.$workspaceId.environment.set-active';
 import { useRemoteFilesLoaderFetcher } from '~/routes/remote-files';
 import { AvatarGroup } from '~/ui/components/avatar';
