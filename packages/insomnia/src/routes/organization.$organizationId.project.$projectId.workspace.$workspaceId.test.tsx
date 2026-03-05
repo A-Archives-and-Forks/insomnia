@@ -387,12 +387,6 @@ const Component = () => {
                     id={item._id}
                     textValue={item.name}
                     className="group w-full outline-hidden select-none"
-                    onAuxClick={e => {
-                      if (e.button === 1) {
-                        e.preventDefault();
-                        navigateToTestSuite(item, true);
-                      }
-                    }}
                     onPress={e => {
                       navigateToTestSuite(item, isPrimaryClickModifier(e));
                     }}
