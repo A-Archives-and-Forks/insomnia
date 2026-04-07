@@ -3,14 +3,20 @@ import { useCallback, useEffect, useMemo } from 'react';
 import { href, matchPath, useLocation, useNavigate, useSearchParams } from 'react-router';
 
 import { database } from '~/common/database';
-import type { GrpcRequest, MockRoute, MockServer, Workspace } from '~/insomnia-data';
-import { type McpRequest, models, services } from '~/insomnia-data';
+import type {
+  GrpcRequest,
+  McpRequest,
+  MockRoute,
+  MockServer,
+  Project,
+  UnitTestSuite,
+  Workspace,
+} from '~/insomnia-data';
+import { models, services } from '~/insomnia-data';
 import * as requestOperations from '~/models/helpers/request-operations';
-import type { Project } from '~/models/project';
 import { isRequest, type Request } from '~/models/request';
 import { isRequestGroup, type RequestGroup } from '~/models/request-group';
 import { isSocketIORequest, type SocketIORequest } from '~/models/socket-io-request';
-import { isUnitTestSuite, type UnitTestSuite } from '~/models/unit-test-suite';
 import { isWebSocketRequest, type WebSocketRequest } from '~/models/websocket-request';
 import { formatMethodName, getRequestMethodShortHand } from '~/ui/components/tags/method-tag';
 import { showResourceNotFoundToast } from '~/ui/components/toast-notification';
@@ -62,7 +68,7 @@ function inferTabType(resource: TabResource): TabType | null {
   if (models.mockRoute.isMockRoute(resource)) {
     return 'mockRoute';
   }
-  if (isUnitTestSuite(resource)) {
+  if (models.unitTestSuite.isUnitTestSuite(resource)) {
     return 'testSuite';
   }
   if (models.workspace.isWorkspace(resource)) {
@@ -282,7 +288,12 @@ export const buildTabFromResource = async (params: AddTabParams, withTab?: boole
     });
   }
 
-  if (isRequest(resource) || models.grpcRequest.isGrpcRequest(resource) || isWebSocketRequest(resource) || isSocketIORequest(resource)) {
+  if (
+    isRequest(resource) ||
+    models.grpcRequest.isGrpcRequest(resource) ||
+    isWebSocketRequest(resource) ||
+    isSocketIORequest(resource)
+  ) {
     baseTab.tag = getRequestMethodShortHand(resource);
     baseTab.method = (resource as Request).method || '';
   }

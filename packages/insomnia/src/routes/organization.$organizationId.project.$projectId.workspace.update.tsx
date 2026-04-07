@@ -2,9 +2,7 @@ import path from 'node:path';
 
 import { href } from 'react-router';
 
-import { services } from '~/insomnia-data';
-import * as models from '~/models';
-import { isGitProject } from '~/models/project';
+import { models, services } from '~/insomnia-data';
 import { safeToUseInsomniaFileNameWithExt } from '~/sync/git/insomnia-filename';
 import { SegmentEvent } from '~/ui/analytics';
 import { invariant } from '~/utils/invariant';
@@ -66,9 +64,9 @@ export async function clientAction({ request }: Route.ClientActionArgs) {
 
   await services.workspace.update(workspace, patch);
 
-  const project = await models.project.getById(workspace.parentId);
+  const project = await services.project.getById(workspace.parentId);
   invariant(project, 'Project not found');
-  if (isGitProject(project)) {
+  if (models.project.isGitProject(project)) {
     const workspaceMeta = await services.workspaceMeta.getOrCreateByParentId(workspace._id);
 
     const existingPathDir = path.dirname(workspaceMeta.gitFilePath || '');

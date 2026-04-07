@@ -31,7 +31,7 @@ export async function clientAction({ request, params }: Route.ClientActionArgs) 
 
     invariant(backendProject, 'Backend project not found');
 
-    const project = await models.project.getByRemoteId(remoteId);
+    const project = await services.project.getByRemoteId(remoteId);
 
     invariant(project?.remoteId, 'Project is not a remote project');
 

@@ -4,17 +4,18 @@ import type { Cookie } from 'tough-cookie';
 
 import type {
   CloudProviderCredential,
+  CookieJar,
+  Environment,
   GrpcRequest,
   McpRequest,
   OAuth2Token,
+  Project,
   Services,
+  UserUploadEnvironment,
   Workspace,
 } from '~/insomnia-data';
 import type { getBodyBuffer } from '~/models/helpers/response-operations';
 
-import type { CookieJar } from '../models/cookie-jar';
-import type { Environment, UserUploadEnvironment } from '../models/environment';
-import type { Project } from '../models/project';
 import type { Request } from '../models/request';
 import type { RequestGroup } from '../models/request-group';
 import type { getLatestForRequestId, Response } from '../models/response';

@@ -1,12 +1,10 @@
 import { createBuilder } from '@develohpanda/fluent-builder';
 import { beforeEach, describe, expect, it } from 'vitest';
 
-import type { Workspace } from '~/insomnia-data';
-import { services } from '~/insomnia-data';
+import type { Environment, Workspace } from '~/insomnia-data';
+import { models, services } from '~/insomnia-data';
 
-import * as models from '../../models';
 import { environmentModelSchema, requestGroupModelSchema } from '../../models/__schemas__/model-schemas';
-import type { Environment } from '../../models/environment';
 import * as renderUtils from '../render';
 
 const envBuilder = createBuilder(environmentModelSchema);
@@ -14,7 +12,7 @@ const reqGroupBuilder = createBuilder(requestGroupModelSchema);
 
 describe('render tests', () => {
   beforeEach(async () => {
-    await models.project.all();
+    await services.project.all();
     await services.settings.getOrCreate();
     envBuilder.reset();
     reqGroupBuilder.reset();
@@ -626,7 +624,7 @@ describe('render tests', () => {
   describe('getRenderedGrpcRequestMessage()', () => {
     it('renders only the body for a grpc request ', async () => {
       const w1 = await services.workspace.create();
-      const env = await models.environment.create({
+      const env = await services.environment.create({
         parentId: w1._id,
         data: {
           foo: 'bar',
@@ -657,7 +655,7 @@ describe('render tests', () => {
 
     beforeEach(async () => {
       w1 = await services.workspace.create();
-      env = await models.environment.create({
+      env = await services.environment.create({
         parentId: w1._id,
         data: {
           foo: 'bar',

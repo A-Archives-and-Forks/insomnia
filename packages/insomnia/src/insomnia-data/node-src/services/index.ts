@@ -2,6 +2,8 @@ import * as apiSpecService from './api-spec';
 import * as caCertificateService from './ca-certificate';
 import * as clientCertificateService from './client-certificate';
 import * as cloudCredentialService from './cloud-credential';
+import * as cookieJarService from './cookie-jar';
+import * as environmentService from './environment';
 import * as gitCredentialsService from './git-credentials';
 import * as gitRepositoryService from './git-repository';
 import * as grpcRequestService from './grpc-request';
@@ -13,11 +15,15 @@ import * as mockRouteService from './mock-route';
 import * as mockServerService from './mock-server';
 import * as oAuth2TokenService from './o-auth-2-token';
 import * as pluginDataService from './plugin-data';
+import * as projectService from './project';
 import * as protoDirectoryService from './proto-directory';
 import * as protoFileService from './proto-file';
 import * as runnerTestResultService from './runner-test-result';
 import * as settingsService from './settings';
 import * as statsService from './stats';
+import * as unitTestService from './unit-test';
+import * as unitTestResultService from './unit-test-result';
+import * as unitTestSuiteService from './unit-test-suite';
 import * as userSessionService from './user-session';
 import * as workspaceService from './workspace';
 import * as workspaceMetaService from './workspace-meta';
@@ -33,6 +39,8 @@ export const servicesNodeImpl = {
   gitCredentials: gitCredentialsService,
   gitRepository: gitRepositoryService,
   mcpPayload: mcpPayloadService,
+  cookieJar: cookieJarService,
+  environment: environmentService,
   mcpRequest: mcpRequestService,
   mcpResponse: mcpResponseService,
   oAuth2Token: oAuth2TokenService,
@@ -40,6 +48,7 @@ export const servicesNodeImpl = {
   protoDirectory: protoDirectoryService,
   protoFile: protoFileService,
   runnerTestResult: runnerTestResultService,
+  project: projectService,
   settings: settingsService,
   stats: statsService,
   userSession: userSessionService,
@@ -49,4 +58,7 @@ export const servicesNodeImpl = {
   workspaceMeta: workspaceMetaService,
   mockRoute: mockRouteService,
   mockServer: mockServerService,
+  unitTest: unitTestService,
+  unitTestResult: unitTestResultService,
+  unitTestSuite: unitTestSuiteService,
 } satisfies Record<string, Record<string, (...args: never[]) => Promise<unknown>>>;

@@ -4,8 +4,7 @@ import nodePath from 'node:path';
 import type { Consola } from 'consola';
 import { pick } from 'es-toolkit';
 
-import type { Workspace } from '~/insomnia-data';
-import type { Environment, UserUploadEnvironment } from '~/models/environment';
+import type { Environment, UserUploadEnvironment, Workspace } from '~/insomnia-data';
 import type { Request, RequestAuthentication, RequestHeader } from '~/models/request';
 import { typedKeys } from '~/utils';
 

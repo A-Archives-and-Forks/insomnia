@@ -2,12 +2,12 @@ import type { Organization } from 'insomnia-api';
 import { useCallback } from 'react';
 import { href, matchPath, type PathMatch, useFetcher } from 'react-router';
 
+import type { Project } from '~/insomnia-data';
 import { services } from '~/insomnia-data';
 
 import { database } from '../common/database';
 import * as models from '../models';
 import { findPersonalOrganization, SCRATCHPAD_ORGANIZATION_ID } from '../models/organization';
-import { type Project, SCRATCHPAD_PROJECT_ID } from '../models/project';
 
 export const enum AsyncTask {
   SyncOrganization,
@@ -49,7 +49,7 @@ export const getInitialRouteForOrganization = async ({
     const match = getMatchParams(prevOrganizationLocation);
 
     if (match && match.params.organizationId && match.params.projectId) {
-      const existingProject = await models.project.getById(match.params.projectId);
+      const existingProject = await services.project.getById(match.params.projectId);
 
       if (existingProject) {
         console.log('Redirecting to last visited project', existingProject._id);
@@ -138,13 +138,13 @@ export const getInitialEntry = async () => {
 
     return href('/organization/:organizationId/project/:projectId/workspace/:workspaceId/debug', {
       organizationId: SCRATCHPAD_ORGANIZATION_ID,
-      projectId: SCRATCHPAD_PROJECT_ID,
+      projectId: models.project.SCRATCHPAD_PROJECT_ID,
       workspaceId: models.workspace.SCRATCHPAD_WORKSPACE_ID,
     });
   } catch {
     return href('/organization/:organizationId/project/:projectId/workspace/:workspaceId/debug', {
       organizationId: SCRATCHPAD_ORGANIZATION_ID,
-      projectId: SCRATCHPAD_PROJECT_ID,
+      projectId: models.project.SCRATCHPAD_PROJECT_ID,
       workspaceId: models.workspace.SCRATCHPAD_WORKSPACE_ID,
     });
   }

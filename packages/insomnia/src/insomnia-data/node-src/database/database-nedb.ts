@@ -14,7 +14,9 @@ import type {
   ChangeType,
   ClientCertificate,
   CloudProviderCredential,
+  CookieJar,
   DataStoreOptions,
+  Environment,
   GitRepository,
   IDatabase,
   Operation,
@@ -23,8 +25,6 @@ import type {
   WorkspaceMeta,
 } from '~/insomnia-data';
 import { mustGetModel } from '~/models';
-import type { CookieJar } from '~/models/cookie-jar';
-import { type Environment } from '~/models/environment';
 import type { AllTypes, BaseModel } from '~/models/index';
 import * as models from '~/models/index';
 

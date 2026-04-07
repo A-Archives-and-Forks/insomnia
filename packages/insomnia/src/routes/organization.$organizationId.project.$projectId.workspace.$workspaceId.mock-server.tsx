@@ -26,7 +26,6 @@ import {
 import { DEFAULT_SIDEBAR_SIZE } from '~/common/constants';
 import type { MockRoute } from '~/insomnia-data';
 import { services } from '~/insomnia-data';
-import * as models from '~/models';
 import { useRootLoaderData } from '~/root';
 import { useWorkspaceLoaderData } from '~/routes/organization.$organizationId.project.$projectId.workspace.$workspaceId';
 import { useMockRouteDeleteActionFetcher } from '~/routes/organization.$organizationId.project.$projectId.workspace.$workspaceId.mock-server.mock-route.$mockRouteId.delete';
@@ -60,7 +59,7 @@ export interface MockServerLoaderData {
 export async function clientLoader({ params }: Route.ClientLoaderArgs) {
   const { workspaceId, projectId, organizationId } = params;
 
-  const project = await models.project.getById(projectId);
+  const project = await services.project.getById(projectId);
   if (!project) {
     showResourceNotFoundToast(`Project not found: ${projectId}`);
     throw redirect(href('/organization/:organizationId/project', { organizationId }));

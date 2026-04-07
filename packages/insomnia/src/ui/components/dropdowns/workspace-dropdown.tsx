@@ -33,7 +33,6 @@ import { database as db } from '../../../common/database';
 import { getWorkspaceLabel } from '../../../common/get-workspace-label';
 import type { PlatformKeyCombinations } from '../../../common/settings';
 import * as models from '../../../models';
-import { isRemoteProject } from '../../../models/project';
 import { isRequest } from '../../../models/request';
 import { isRequestGroup } from '../../../models/request-group';
 import type { WorkspaceAction } from '../../../plugins';
@@ -461,7 +460,7 @@ export const WorkspaceDropdown: FC<{}> = () => {
                         <strong className="break-all whitespace-pre-wrap">{activeWorkspace?.name}</strong>{' '}
                         {getWorkspaceLabel(activeWorkspace).singular}
                       </p>
-                      {isRemoteProject(activeProject) && (
+                      {models.project.isRemoteProject(activeProject) && (
                         <RadioGroup name="localOnly" defaultValue="false" className="mb-2 flex flex-col gap-2">
                           <Label className="text-sm text-(--hl)">How do you want to delete it?</Label>
                           <div className="flex gap-2">

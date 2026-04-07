@@ -19,10 +19,15 @@ import { migrateToLatestYaml } from '~/common/insomnia-schema-migrations';
 import { INSOMNIA_SCHEMA_VERSION } from '~/common/insomnia-schema-migrations/schema-version';
 import type {
   ApiSpec,
+  CookieJar,
+  Environment,
+  EnvironmentKvPairData,
   GrpcRequest,
   McpRequest,
   MockRoute,
   MockServer,
+  UnitTest,
+  UnitTestSuite,
   Workspace,
   WorkspaceScope,
 } from '~/insomnia-data';
@@ -31,14 +36,9 @@ import { maskVaultEnvironmentData } from '~/utils/environment-utils';
 import { invariant } from '~/utils/invariant';
 
 import * as models from '../models';
-import type { CookieJar } from '../models/cookie-jar';
-import type { EnvironmentKvPairData } from '../models/environment';
-import { type Environment } from '../models/environment';
 import type { Request, RequestBody, RequestHeader, RequestParameter } from '../models/request';
 import type { RequestGroup } from '../models/request-group';
 import type { SocketIORequest } from '../models/socket-io-request';
-import type { UnitTest } from '../models/unit-test';
-import type { UnitTestSuite } from '../models/unit-test-suite';
 import type { WebSocketRequest } from '../models/websocket-request';
 import { database } from './database';
 import {

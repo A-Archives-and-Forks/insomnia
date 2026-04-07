@@ -20,7 +20,6 @@ import {
   type ImportSourceType,
   type ScanResult,
 } from '../../../../common/import';
-import { isScratchpadProject } from '../../../../models/project';
 import { invariant } from '../../../../utils/invariant';
 import { SegmentEvent } from '../../../analytics';
 import { Modal, type ModalHandle, type ModalProps } from '../../base/modal';
@@ -328,7 +327,7 @@ export const ImportModal: FC<ImportModalProps> = ({
       : 'Import';
   const isScratchPad =
     defaultProjectId &&
-    isScratchpadProject({
+    models.project.isScratchpadProject({
       _id: defaultProjectId,
     });
 

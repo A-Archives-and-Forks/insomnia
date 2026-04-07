@@ -4,7 +4,6 @@ import { href, redirect, useNavigate } from 'react-router';
 
 import { models } from '~/insomnia-data';
 import { SCRATCHPAD_ORGANIZATION_ID } from '~/models/organization';
-import { SCRATCHPAD_PROJECT_ID } from '~/models/project';
 import { SegmentEvent } from '~/ui/analytics';
 import { getLoginUrl } from '~/ui/auth-session-provider.client';
 import { Icon } from '~/ui/components/icon';
@@ -160,7 +159,7 @@ const Component = () => {
             navigate(
               href('/organization/:organizationId/project/:projectId/workspace/:workspaceId/debug', {
                 organizationId: SCRATCHPAD_ORGANIZATION_ID,
-                projectId: SCRATCHPAD_PROJECT_ID,
+                projectId: models.project.SCRATCHPAD_PROJECT_ID,
                 workspaceId: models.workspace.SCRATCHPAD_WORKSPACE_ID,
               }),
             );

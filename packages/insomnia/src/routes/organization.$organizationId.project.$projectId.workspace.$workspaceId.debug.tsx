@@ -44,13 +44,11 @@ import { DEFAULT_SIDEBAR_SIZE, getProductName, SORT_ORDERS, type SortOrder, sort
 import { type ChangeBufferEvent } from '~/common/database';
 import { generateId, isNotNullOrUndefined } from '~/common/misc';
 import type { PlatformKeyCombinations } from '~/common/settings';
-import type { GrpcRequest, Workspace } from '~/insomnia-data';
+import type { Environment, GrpcRequest, Project, Workspace } from '~/insomnia-data';
 import { services } from '~/insomnia-data';
 import type { GrpcMethodInfo } from '~/main/ipc/grpc';
 import * as models from '~/models';
-import type { Environment } from '~/models/environment';
 import { isScratchpadOrganizationId } from '~/models/organization';
-import type { Project } from '~/models/project';
 import {
   isEventStreamRequest,
   isGraphqlSubscriptionRequest,
@@ -161,7 +159,7 @@ export async function clientLoader({ params, request }: Route.ClientLoaderArgs) 
   if (!params.requestId && !params.requestGroupId) {
     const { projectId, workspaceId, organizationId } = params;
 
-    const activeProject = await models.project.getById(projectId);
+    const activeProject = await services.project.getById(projectId);
     if (!activeProject) {
       showResourceNotFoundToast(`Project not found: ${projectId}`);
       throw redirect(href('/organization/:organizationId/project', { organizationId }));

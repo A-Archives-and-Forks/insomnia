@@ -2,12 +2,10 @@ import type { Organization } from 'insomnia-api';
 
 import { database } from '~/common/database';
 import { fuzzyMatch } from '~/common/misc';
-import type { GrpcRequest, Workspace } from '~/insomnia-data';
+import type { Environment, GrpcRequest, Project, Workspace } from '~/insomnia-data';
 import { models, services } from '~/insomnia-data';
 import { environment, grpcRequest, project, request, requestGroup, webSocketRequest, workspace } from '~/models';
-import type { Environment } from '~/models/environment';
 import { isScratchpadOrganizationId } from '~/models/organization';
-import { isRemoteProject, type Project } from '~/models/project';
 import type { Request } from '~/models/request';
 import type { RequestGroup } from '~/models/request-group';
 import type { WebSocketRequest } from '~/models/websocket-request';
@@ -229,7 +227,7 @@ export async function clientLoader(args: Route.ClientLoaderArgs) {
           name: workspace.name,
           item: {
             ...workspace,
-            teamProjectId: parentProject && isRemoteProject(parentProject) ? parentProject.remoteId : '',
+            teamProjectId: parentProject && project.isRemoteProject(parentProject) ? parentProject.remoteId : '',
           },
           organizationName: allOrganizations.find(org => org.id === organizationId)?.display_name || '',
           projectName: allProjects.find(project => project._id === projectId)?.name || '',
@@ -270,7 +268,7 @@ export async function clientLoader(args: Route.ClientLoaderArgs) {
           name: workspace.name,
           item: {
             ...workspace,
-            teamProjectId: parentProject && isRemoteProject(parentProject) ? parentProject.remoteId : '',
+            teamProjectId: parentProject && project.isRemoteProject(parentProject) ? parentProject.remoteId : '',
           },
           organizationName: allOrganizations.find(org => org.id === organizationId)?.display_name || '',
           projectName: allProjects.find(project => project._id === projectId)?.name || '',

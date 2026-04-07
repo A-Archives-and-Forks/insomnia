@@ -33,6 +33,11 @@ export type { OAuth2Token } from './o-auth-2-token';
 export type { PluginData } from './plugin-data';
 export type { ProtoDirectory } from './proto-directory';
 export type { ProtoFile } from './proto-file';
+export type { Cookie, CookieJar } from './cookie-jar';
+export type { Environment, EnvironmentKvPairData, UserUploadEnvironment } from './environment';
+// Keep these enums in the shared entrypoint: unlike type-only exports, enums also exist at runtime,
+// so they must be re-exported as values here to preserve a single import path for both type and value usage.
+export { EnvironmentType, EnvironmentKvPairDataType } from './environment';
 export type { McpRequest, McpTransportType, McpServerPrimitiveTypes } from './mcp-request';
 export type { McpPayload } from './mcp-payload';
 export type { McpResponse } from './mcp-response';
@@ -43,6 +48,7 @@ export type {
   ResponseInfo,
   RunnerResultPerRequestPerIteration,
 } from './runner-test-result';
+export type { Project, LocalProject, RemoteProject, GitProject } from './project';
 export type { Settings, ThemeSettings } from './settings';
 export type { Stats } from './stats';
 export type { UserSession } from './user-session';
@@ -52,3 +58,6 @@ export type { Workspace, WorkspaceScope } from './workspace';
 export type { WorkspaceMeta } from './workspace-meta';
 export type { MockRoute } from './mock-route';
 export type { MockServer } from './mock-server';
+export type { UnitTest } from './unit-test';
+export type { UnitTestResult } from './unit-test-result';
+export type { UnitTestSuite } from './unit-test-suite';
