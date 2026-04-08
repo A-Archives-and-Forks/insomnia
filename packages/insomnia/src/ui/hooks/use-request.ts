@@ -5,6 +5,10 @@ import type {
   GrpcRequestMeta,
   McpPayload,
   McpRequest,
+  Request,
+  RequestGroup,
+  RequestGroupMeta,
+  RequestMeta,
   Settings,
   SocketIOPayload,
   SocketIORequest,
@@ -18,11 +22,6 @@ import { useRequestGroupUpdateActionFetcher } from '~/routes/organization.$organ
 import { useRequestGroupUpdateMetaActionFetcher } from '~/routes/organization.$organizationId.project.$projectId.workspace.$workspaceId.debug.request-group.$requestGroupId.update-meta';
 import { useWorkspaceUpdateMetaActionFetcher } from '~/routes/organization.$organizationId.project.$projectId.workspace.$workspaceId.update-meta';
 import { useSettingsUpdateActionFetcher } from '~/routes/settings.update';
-
-import type { Request } from '../../models/request';
-import type { RequestGroup } from '../../models/request-group';
-import type { RequestGroupMeta } from '../../models/request-group-meta';
-import type { RequestMeta } from '../../models/request-meta';
 
 export const useRequestPatcher = () => {
   const { organizationId, projectId, workspaceId } = useParams() as {

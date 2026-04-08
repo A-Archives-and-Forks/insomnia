@@ -1,6 +1,7 @@
 import { replaceIdsInFields } from '~/models/helpers/replace-ids-in-fields';
-import type { RequestAuthentication, RequestHeader, RequestParameter, RequestPathParameter } from '~/models/request';
 import type { BaseModel } from '~/models/types';
+
+import type { RequestAuthentication, RequestHeader, RequestParameter, RequestPathParameter } from './request';
 
 export const name = 'Socket.IO Request';
 

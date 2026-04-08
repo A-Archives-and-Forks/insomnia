@@ -1,14 +1,13 @@
-import type { GrpcRequest, McpRequest, SocketIORequest, WebSocketRequest } from '~/insomnia-data';
+import type { GrpcRequest, McpRequest, Request, SocketIORequest, WebSocketRequest } from '~/insomnia-data';
 import { services } from '~/insomnia-data';
 
 import * as models from '../index';
-import type { Request } from '../request';
 
 export function findByParentId(
   parentId: string,
 ): Promise<(Request | GrpcRequest | WebSocketRequest | SocketIORequest | McpRequest)[]> {
   return Promise.all([
-    models.request.findByParentId(parentId),
+    services.request.findByParentId(parentId),
     services.grpcRequest.findByParentId(parentId),
     services.webSocketRequest.findByParentId(parentId),
     services.socketIORequest.findByParentId(parentId),
@@ -37,7 +36,7 @@ export function getById(
   if (models.mcpRequest.isMcpRequestId(requestId)) {
     return services.mcpRequest.getById(requestId);
   }
-  return models.request.getById(requestId);
+  return services.request.getById(requestId);
 }
 
 export function remove(request: Request | GrpcRequest | WebSocketRequest | SocketIORequest | McpRequest) {
@@ -56,7 +55,7 @@ export function remove(request: Request | GrpcRequest | WebSocketRequest | Socke
     return services.mcpRequest.remove(request);
   }
 
-  return models.request.remove(request);
+  return services.request.remove(request);
 }
 
 export function update<T extends object>(request: T, patch: Partial<T> = {}): Promise<T> {
@@ -83,7 +82,7 @@ export function update<T extends object>(request: T, patch: Partial<T> = {}): Pr
   }
 
   // @ts-expect-error -- TSCONVERSION
-  return models.request.update(request, patch);
+  return services.request.update(request, patch);
 }
 
 export function duplicate<T extends object>(request: T, patch: Partial<T> = {}): Promise<T> {
@@ -103,5 +102,5 @@ export function duplicate<T extends object>(request: T, patch: Partial<T> = {}):
     return services.socketIORequest.duplicate(request, patch);
   }
   // @ts-expect-error -- TSCONVERSION
-  return models.request.duplicate(request, patch);
+  return services.request.duplicate(request, patch);
 }

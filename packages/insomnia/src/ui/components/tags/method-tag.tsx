@@ -1,10 +1,11 @@
 import React, { type FC, memo } from 'react';
 
-import type { GrpcRequest, McpRequest, SocketIORequest, WebSocketRequest } from '~/insomnia-data';
+import type { GrpcRequest, McpRequest, Request, SocketIORequest, WebSocketRequest } from '~/insomnia-data';
 import { models } from '~/insomnia-data';
 
 import { CONTENT_TYPE_GRAPHQL, METHOD_DELETE, METHOD_OPTIONS } from '../../../common/constants';
-import { isEventStreamRequest, isRequest, type Request } from '../../../models/request';
+
+const { isEventStreamRequest, isRequest } = models.request;
 
 interface Props {
   method: string;

@@ -8,9 +8,8 @@ import {
   METHOD_GET,
   METHOD_POST,
 } from '~/common/constants';
+import type { Request, RequestBody, RequestParameter } from '~/insomnia-data';
 import { services } from '~/insomnia-data';
-import * as models from '~/models';
-import type { Request, RequestBody, RequestParameter } from '~/models/request';
 import { SegmentEvent } from '~/ui/analytics';
 import type { CreateRequestType } from '~/ui/hooks/use-request';
 import { invariant } from '~/utils/invariant';
@@ -42,7 +41,7 @@ export async function clientAction({ params, request }: Route.ClientActionArgs) 
   let activeRequestId;
   if (requestType === 'HTTP') {
     activeRequestId = (
-      await models.request.create({
+      await services.request.create({
         parentId: parentId || workspaceId,
         method: METHOD_GET,
         name: 'New Request',
@@ -60,7 +59,7 @@ export async function clientAction({ params, request }: Route.ClientActionArgs) 
   }
   if (requestType === 'GraphQL') {
     activeRequestId = (
-      await models.request.create({
+      await services.request.create({
         parentId: parentId || workspaceId,
         method: METHOD_POST,
         headers: [...defaultHeaders, { name: 'Content-Type', value: CONTENT_TYPE_JSON }],
@@ -74,7 +73,7 @@ export async function clientAction({ params, request }: Route.ClientActionArgs) 
   }
   if (requestType === 'Event Stream') {
     activeRequestId = (
-      await models.request.create({
+      await services.request.create({
         parentId: parentId || workspaceId,
         method: METHOD_GET,
         url: '',
@@ -107,7 +106,7 @@ export async function clientAction({ params, request }: Route.ClientActionArgs) 
     }
     try {
       activeRequestId = (
-        await models.request.create({
+        await services.request.create({
           parentId: parentId || workspaceId,
           url: req.url,
           method: req.method,

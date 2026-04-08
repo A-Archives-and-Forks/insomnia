@@ -44,20 +44,20 @@ import { DEFAULT_SIDEBAR_SIZE, getProductName, SORT_ORDERS, type SortOrder, sort
 import { type ChangeBufferEvent } from '~/common/database';
 import { generateId, isNotNullOrUndefined } from '~/common/misc';
 import type { PlatformKeyCombinations } from '~/common/settings';
-import type { Environment, GrpcRequest, Project, SocketIORequest, WebSocketRequest, Workspace } from '~/insomnia-data';
+import type {
+  Environment,
+  GrpcRequest,
+  Project,
+  Request,
+  RequestGroup,
+  SocketIORequest,
+  WebSocketRequest,
+  Workspace,
+} from '~/insomnia-data';
 import { services } from '~/insomnia-data';
 import type { GrpcMethodInfo } from '~/main/ipc/grpc';
 import * as models from '~/models';
 import { isScratchpadOrganizationId } from '~/models/organization';
-import {
-  isEventStreamRequest,
-  isGraphqlSubscriptionRequest,
-  isRequest,
-  isRequestId,
-  type Request,
-} from '~/models/request';
-import { isRequestGroup, isRequestGroupId, type RequestGroup } from '~/models/request-group';
-import { getByParentId as getRequestMetaByParentId } from '~/models/request-meta';
 import { useRootLoaderData } from '~/root';
 import {
   type Child,
@@ -128,6 +128,9 @@ import { getGrpcConnectionErrorDetails, isGrpcConnectionError } from '~/utils/gr
 
 import type { Route } from './+types/organization.$organizationId.project.$projectId.workspace.$workspaceId.debug';
 
+const { isEventStreamRequest, isGraphqlSubscriptionRequest, isRequest, isRequestId } = models.request;
+const { isRequestGroup, isRequestGroupId } = models.requestGroup;
+
 export interface GrpcMessage {
   id: string;
   text: string;
@@ -171,7 +174,7 @@ export async function clientLoader({ params, request }: Route.ClientLoaderArgs) 
 
     const activeWorkspaceMeta = await services.workspaceMeta.getOrCreateByParentId(workspaceId);
     const activeRequestId = activeWorkspaceMeta.activeRequestId;
-    const activeRequest = activeRequestId ? await models.request.getById(activeRequestId) : null;
+    const activeRequest = activeRequestId ? await services.request.getById(activeRequestId) : null;
     // TODO(george): we should remove this after enabling the sidebar for the runner
     const startOfQuery = request.url.indexOf('?');
     const urlWithoutQuery = startOfQuery > 0 ? request.url.slice(0, startOfQuery) : request.url;
@@ -396,7 +399,7 @@ const Debug = () => {
       if (requestId) {
         const meta = models.grpcRequest.isGrpcRequestId(requestId)
           ? await services.grpcRequestMeta.getByParentId(requestId)
-          : await getRequestMetaByParentId(requestId);
+          : await services.requestMeta.getByParentId(requestId);
         patchRequestMeta(requestId, { pinned: !meta?.pinned });
       }
     },
@@ -1091,7 +1094,7 @@ const Debug = () => {
                     }}
                   >
                     <div className="relative flex h-(--line-height-xs) w-full items-center gap-2 overflow-hidden px-4 text-(--hl) outline-hidden transition-colors select-none group-hover:bg-(--hl-xs) group-focus:bg-(--hl-sm) group-aria-selected:text-(--color-font)">
-                      <span className="absolute top-0 left-0 h-full w-[2px] bg-transparent transition-colors group-aria-selected:bg-(--color-surprise)" />
+                      <span className="absolute top-0 left-0 h-full w-0.5 bg-transparent transition-colors group-aria-selected:bg-(--color-surprise)" />
                       {isRequest(item.doc) && (
                         <span
                           className={`flex w-10 shrink-0 items-center justify-center rounded-xs border border-solid border-(--hl-sm) text-[0.65rem] ${
@@ -1532,7 +1535,7 @@ const CollectionGridListItem = ({
       >
         <span
           data-selected={isSelected}
-          className="absolute top-0 left-0 h-full w-[2px] bg-transparent transition-colors data-[selected=true]:bg-(--color-surprise)"
+          className="absolute top-0 left-0 h-full w-0.5 bg-transparent transition-colors data-[selected=true]:bg-(--color-surprise)"
         />
         <Button slot="drag" className="hidden" />
         {isRequest(item.doc) && (

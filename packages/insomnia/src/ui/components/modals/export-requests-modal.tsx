@@ -3,12 +3,10 @@ import React, { type FC, type ReactNode, useEffect, useState } from 'react';
 import { Button, Checkbox, Dialog, Heading, Modal, ModalOverlay } from 'react-aria-components';
 import { useParams } from 'react-router';
 
-import type { GrpcRequest, SocketIORequest, WebSocketRequest } from '~/insomnia-data';
+import type { GrpcRequest, Request, RequestGroup, SocketIORequest, WebSocketRequest } from '~/insomnia-data';
 import { models } from '~/insomnia-data';
 
 import { requestGroup } from '../../../models';
-import { isRequest, type Request } from '../../../models/request';
-import type { RequestGroup } from '../../../models/request-group';
 import {
   type Child,
   useWorkspaceLoaderFetcher,
@@ -17,6 +15,8 @@ import {
 import { SegmentEvent } from '../../analytics';
 import { Icon } from '../icon';
 import { getMethodShortHand } from '../tags/method-tag';
+
+const { isRequest } = models.request;
 
 export interface Node {
   doc: Request | WebSocketRequest | GrpcRequest | RequestGroup | SocketIORequest;

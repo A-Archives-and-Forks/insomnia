@@ -9,6 +9,7 @@ import type {
   GrpcRequest,
   McpRequest,
   MockRoute,
+  Request,
   SocketIORequest,
   UnitTest,
   UnitTestSuite,
@@ -24,8 +25,6 @@ import { pathWithParamsAsPathParameters } from '../main/importers/importers/open
 import { id as postmanEnvImporterId } from '../main/importers/importers/postman-env';
 import * as models from '../models/index';
 import { type AllTypes, type BaseModel, getModel } from '../models/index';
-import { isRequest, type Request } from '../models/request';
-import { isRequestGroup } from '../models/request-group';
 import { invariant } from '../utils/invariant';
 import { parseApiSpec, type ParsedApiSpec } from './api-specs';
 import { JSON_ORDER_PREFIX, JSON_ORDER_SEPARATOR } from './constants';
@@ -33,7 +32,9 @@ import { database as db } from './database';
 import { tryImportV5Data } from './insomnia-v5';
 import { generateId } from './misc';
 
+const { isRequest } = models.request;
 const { isApiSpec } = models.apiSpec;
+const { isRequestGroup } = models.requestGroup;
 
 export const IMPORT_SOURCE_TYPES = ['file', 'uri', 'curl', 'clipboard', 'mcp'] as const;
 export type ImportSourceType = (typeof IMPORT_SOURCE_TYPES)[number];
@@ -560,7 +561,7 @@ export const importResourcesToWorkspace = async ({
         } else if (models.unitTest.isUnitTest(resource)) {
           await services.unitTest.create(objectToWrite);
         } else if (isRequest(resource)) {
-          await models.request.create(objectToWrite);
+          await services.request.create(objectToWrite);
         } else {
           await db.docCreate(model.type, objectToWrite);
         }
@@ -649,7 +650,7 @@ export const importResourcesToNewWorkspace = async ({
       } else if (models.unitTest.isUnitTest(resource)) {
         await services.unitTest.create(objectToWrite);
       } else if (isRequest(resource)) {
-        await models.request.create(objectToWrite);
+        await services.request.create(objectToWrite);
       } else {
         await db.docCreate(model.type, objectToWrite);
       }

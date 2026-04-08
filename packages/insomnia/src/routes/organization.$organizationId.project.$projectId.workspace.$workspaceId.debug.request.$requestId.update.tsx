@@ -3,13 +3,14 @@ import { href } from 'react-router';
 import type { WebSocketRequest } from '~/insomnia-data';
 import { models } from '~/insomnia-data';
 import * as requestOperations from '~/models/helpers/request-operations';
-import { getPathParametersFromUrl, isRequest } from '~/models/request';
 import { SegmentEvent } from '~/ui/analytics';
 import { updateMimeType } from '~/ui/components/dropdowns/content-type-dropdown';
 import { invariant } from '~/utils/invariant';
 import { createFetcherSubmitHook } from '~/utils/router';
 
 import type { Route } from './+types/organization.$organizationId.project.$projectId.workspace.$workspaceId.debug.request.$requestId.update';
+
+const { getPathParametersFromUrl, isRequest } = models.request;
 
 export async function clientAction({ params, request }: Route.ClientActionArgs) {
   const { requestId } = params;

@@ -3,15 +3,21 @@ import React, { useCallback, useRef } from 'react';
 import { Button } from 'react-aria-components';
 import { useParams } from 'react-router';
 
-import type { McpResponse, SocketIOResponse, WebSocketRequest, WebSocketResponse } from '~/insomnia-data';
+import type {
+  McpResponse,
+  Request,
+  RequestVersion,
+  Response,
+  SocketIOResponse,
+  WebSocketRequest,
+  WebSocketResponse,
+} from '~/insomnia-data';
+import { services } from '~/insomnia-data';
 import { useRequestResponseDeleteActionFetcher } from '~/routes/organization.$organizationId.project.$projectId.workspace.$workspaceId.debug.request.$requestId.response.delete';
 import { useRequestResponseDeleteAllActionFetcher } from '~/routes/organization.$organizationId.project.$projectId.workspace.$workspaceId.debug.request.$requestId.response.delete-all';
 
 import { decompressObject } from '../../../common/misc';
 import * as models from '../../../models/index';
-import { isRequest, type Request } from '../../../models/request';
-import { type RequestVersion } from '../../../models/request-version';
-import type { Response } from '../../../models/response';
 import { useWorkspaceLoaderData } from '../../../routes/organization.$organizationId.project.$projectId.workspace.$workspaceId';
 import { useRequestMetaPatcher } from '../../hooks/use-request';
 import { Dropdown, type DropdownHandle, DropdownItem, DropdownSection, ItemContent } from '../base/dropdown';
@@ -21,6 +27,8 @@ import { StatusTag, StringStatusTag } from '../tags/status-tag';
 import { TimeTag } from '../tags/time-tag';
 import { URLTag } from '../tags/url-tag';
 import { TimeFromNow } from '../time-from-now';
+
+const { isRequest } = models.request;
 
 type ResponseType = Response | WebSocketResponse | SocketIOResponse | McpResponse;
 
@@ -69,7 +77,7 @@ export const ResponseHistoryDropdown = ({
       }
 
       if (activeResponse.requestVersionId) {
-        await models.requestVersion.restore(activeResponse.requestVersionId);
+        await services.requestVersion.restore(activeResponse.requestVersionId);
       }
 
       await patchRequestMeta(requestId, { activeResponseId: activeResponse._id });

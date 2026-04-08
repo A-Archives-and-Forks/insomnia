@@ -26,6 +26,11 @@ import type {
   McpRequest,
   MockRoute,
   MockServer,
+  Request,
+  RequestBody,
+  RequestGroup,
+  RequestHeader,
+  RequestParameter,
   SocketIORequest,
   UnitTest,
   UnitTestSuite,
@@ -38,8 +43,6 @@ import { maskVaultEnvironmentData } from '~/utils/environment-utils';
 import { invariant } from '~/utils/invariant';
 
 import * as models from '../models';
-import type { Request, RequestBody, RequestHeader, RequestParameter } from '../models/request';
-import type { RequestGroup } from '../models/request-group';
 import { database } from './database';
 import {
   type Insomnia_GRPCRequest,

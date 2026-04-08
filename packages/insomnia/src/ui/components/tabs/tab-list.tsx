@@ -12,7 +12,7 @@ import {
 } from 'react-aria-components';
 import { useParams } from 'react-router';
 
-import type { MockRoute } from '~/insomnia-data';
+import type { MockRoute, Request } from '~/insomnia-data';
 import { services } from '~/insomnia-data';
 import { useRequestNewActionFetcher } from '~/routes/organization.$organizationId.project.$projectId.workspace.$workspaceId.debug.request.new';
 import { useInsomniaTab } from '~/ui/hooks/use-insomnia-tab';
@@ -20,8 +20,6 @@ import { useInsomniaTab } from '~/ui/hooks/use-insomnia-tab';
 import { type ChangeBufferEvent, type ChangeType, database } from '../../../common/database';
 import { debounce } from '../../../common/misc';
 import * as models from '../../../models/index';
-import { isRequest, type Request } from '../../../models/request';
-import { isRequestGroup } from '../../../models/request-group';
 import { INSOMNIA_TAB_HEIGHT } from '../../constant';
 import { useInsomniaTabContext } from '../../context/app/insomnia-tab-context';
 import { type Size, useResizeObserver } from '../../hooks/use-resize-observer';
@@ -30,6 +28,9 @@ import { useDocBodyKeyboardShortcuts } from '../keydown-binder';
 import { AddRequestToCollectionModal } from '../modals/add-request-to-collection-modal';
 import { formatMethodName, getRequestMethodShortHand } from '../tags/method-tag';
 import { type BaseTab, InsomniaTab } from './tab';
+
+const { isRequest } = models.request;
+const { isRequestGroup } = models.requestGroup;
 
 export interface OrganizationTabs {
   tabList: BaseTab[];

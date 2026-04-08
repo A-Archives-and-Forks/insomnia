@@ -3,6 +3,7 @@ import * as requestOperations from '~/models/helpers/request-operations';
 
 import { database as db } from '../../src/database';
 import { type SocketIOResponse } from '../../src/models/types';
+import * as requestVersionService from './request-version';
 import * as settingsService from './settings';
 
 const { type } = models.socketIOResponse;
@@ -31,7 +32,7 @@ export async function create(patch: Partial<SocketIOResponse> = {}, maxResponses
   const { parentId } = patch;
   // Create request version snapshot
   const request = await requestOperations.getById(parentId);
-  const requestVersion = request ? await models.requestVersion.create(request) : null;
+  const requestVersion = request ? await requestVersionService.create(request) : null;
   patch.requestVersionId = requestVersion ? requestVersion._id : null;
   // Filter responses by environment if setting is enabled
   const query: Record<string, any> = {

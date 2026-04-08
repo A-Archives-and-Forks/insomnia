@@ -10,6 +10,9 @@ import type {
   McpRequest,
   OAuth2Token,
   Project,
+  Request,
+  RequestGroup,
+  Response,
   Services,
   SocketIORequest,
   UserUploadEnvironment,
@@ -18,9 +21,6 @@ import type {
 } from '~/insomnia-data';
 import type { getBodyBuffer } from '~/models/helpers/response-operations';
 
-import type { Request } from '../models/request';
-import type { RequestGroup } from '../models/request-group';
-import type { getLatestForRequestId, Response } from '../models/response';
 import type { NodeCurlRequestOptions, NodeCurlResponseType } from '../plugins/context/network';
 import type { PluginStore } from '../plugins/context/store';
 import type { extractNunjucksTagFromCoords } from './utils';
@@ -295,7 +295,7 @@ export interface PluginTemplateTagContext {
         getCookiesForUrl: (parentId: string, url: string) => Promise<Cookie[]>;
       };
       response: {
-        getLatestForRequestId: typeof getLatestForRequestId;
+        getLatestForRequestId: Services['response']['getLatestForRequestId'];
         getBodyBuffer: typeof getBodyBuffer;
       };
       settings: {
