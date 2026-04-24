@@ -7,7 +7,7 @@ import type {
   OpenDialogOptions,
   SaveDialogOptions,
 } from 'electron';
-import { app, BrowserWindow, clipboard, dialog, ipcMain, Menu, shell } from 'electron';
+import { app, BrowserWindow, clipboard, dialog, ipcMain, ipcRenderer, Menu, shell } from 'electron';
 import { localTemplateTags } from 'insomnia/src/templating/local-template-tags';
 
 import { fnOrString } from '../../common/misc';
@@ -84,6 +84,7 @@ export type HandleChannels =
   | 'grpc.loadMethods'
   | 'grpc.loadMethodsFromReflection'
   | 'grpc.writeProtoFile'
+  | 'initializeWorkspaceBackendProject'
   | 'insecureReadFile'
   | 'insecureReadFileWithEncoding'
   | 'installPlugin'
@@ -137,6 +138,9 @@ export type HandleChannels =
   | 'showSaveDialog'
   | 'socketIO.event.findMany'
   | 'socketIO.event.send'
+  | 'syncNewWorkspaceIfNeeded'
+  | 'sync.invoke'
+  | 'sync.pullRemoteBackendProject'
   | 'socketIO.open'
   | 'socketIO.readyState'
   | 'webSocket.event.findMany'
@@ -195,6 +199,8 @@ export type MainOnChannels =
   | 'mcp.closeAll'
   | 'mcp.client.responseElicitationRequest'
   | 'mcp.client.responseSamplingRequest'
+  | 'sync.cancelConflict'
+  | 'sync.resolveConflict'
   | 'mcp.sendMCPRequest'
   | 'writeText';
 
@@ -214,6 +220,7 @@ export type RendererOnChannels =
   | 'shell:open'
   | 'show-notification'
   | 'show-toast'
+  | 'sync.merge-conflicts'
   | 'toggle-preferences-shortcuts'
   | 'toggle-preferences'
   | 'toggle-sidebar'
@@ -232,6 +239,31 @@ export const ipcMainOnce = (
   channel: OnceChannels,
   listener: (event: IpcMainEvent, ...args: any[]) => Promise<void> | any,
 ) => ipcMain.once(channel, listener);
+
+const normalizeIpcError = (error: unknown) => {
+  if (!(error instanceof Error)) {
+    return new Error(String(error));
+  }
+
+  const cleanedMessage = error.message.replace(/^Error invoking remote method '[^']+': Error:\s*/, '');
+
+  if (cleanedMessage === error.message) {
+    return error;
+  }
+
+  const normalized = new Error(cleanedMessage);
+  normalized.name = error.name;
+  normalized.stack = error.stack;
+  return normalized;
+};
+
+export const invokeWithNormalizedError = async <T>(channel: string, ...args: unknown[]) => {
+  try {
+    return (await ipcRenderer.invoke(channel, ...args)) as T;
+  } catch (error) {
+    throw normalizeIpcError(error);
+  }
+};
 
 const getTemplateValue = (arg: NunjucksParsedTagArg) => {
   if (arg.defaultValue === undefined) {

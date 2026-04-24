@@ -98,8 +98,8 @@ export const test = baseTest.extend<{
       INSOMNIA_VAULT_SRP_SECRET: userConfig.vaultSrpSecret || '',
       ...(userConfig.session ? { INSOMNIA_SESSION: JSON.stringify(userConfig.session) } : {}),
     };
-
     const { ELECTRON_RUN_AS_NODE: _ignored, ...launchEnv } = process.env;
+
     const electronApp = await playwright._electron.launch({
       cwd,
       executablePath,
