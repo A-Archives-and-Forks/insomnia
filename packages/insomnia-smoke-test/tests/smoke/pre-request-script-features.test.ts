@@ -439,8 +439,11 @@ test.describe('pre-request features tests', () => {
     await page.getByTestId('request-pane').getByRole('button', { name: 'Send' }).click();
     // verify
     await page.getByRole('tab', { name: 'Console' }).click();
-    await expect.soft(responsePane).toContainText('* Adding SSL PEM certificate');
-    await expect.soft(responsePane).toContainText('Adding SSL KEY certificate');
+    // test certificate manipulation script replaces the active cert with an invalid one
+    // it should not be used
+    const bodyText = await responsePane.innerText();
+    expect.soft(bodyText).not.toContain('Adding SSL PEM certificate');
+    expect.soft(bodyText).not.toContain('Adding SSL KEY certificate');
   });
 
   test('insomnia.request / update clientCertificate', async ({ page }) => {
@@ -457,8 +460,11 @@ test.describe('pre-request features tests', () => {
     await page.getByTestId('request-pane').getByRole('button', { name: 'Send' }).click();
     // verify
     await page.getByRole('tab', { name: 'Console' }).click();
-    await expect.soft(responsePane).toContainText('Adding SSL PEM certificate');
-    await expect.soft(responsePane).toContainText('Adding SSL KEY certificate');
+    // test certificate manipulation script replaces the active cert with an invalid one
+    // it should not be used
+    const bodyText = await responsePane.innerText();
+    expect.soft(bodyText).not.toContain('Adding SSL PEM certificate');
+    expect.soft(bodyText).not.toContain('Adding SSL KEY certificate');
   });
 
   test('insomnia.test and insomnia.expect can work together', async ({ page }) => {
@@ -662,9 +668,7 @@ test.describe('unhappy paths', () => {
     await page.getByTestId('request-pane').getByRole('button', { name: 'Send' }).click();
 
     // verify
-    await expect
-      .soft(page.getByTestId('response-pane'))
-      .toContainText(`my custom error`);
+    await expect.soft(page.getByTestId('response-pane')).toContainText(`my custom error`);
 
     await page.getByRole('tab', { name: 'Scripts' }).click();
     await page.getByTestId('CodeEditor').getByRole('textbox').press('ControlOrMeta+a');
@@ -697,15 +701,14 @@ test.describe('sandbox features', () => {
     await page.getByRole('dialog').getByRole('button', { name: 'Import' }).click();
   });
 
-  // Blocked Roots / Scopes group: 'this' is blocked. 
+  // Blocked Roots / Scopes group: 'this' is blocked.
   test('blocked roots / scopes group', async ({ page }) => {
     await page.getByLabel('Request Collection').getByTestId('echo pre-request script result').press('Enter');
 
-    
     await page.getByRole('tab', { name: 'Scripts' }).click();
     const editor = page.getByTestId('CodeEditor').getByRole('textbox');
-    
-    // enter script that accesses a property on 'this'. 
+
+    // enter script that accesses a property on 'this'.
     await editor.fill(`insomnia.environment.set('result', String(this?.process));`);
 
     // CodeMirror debounces onChange by DEBOUNCE_MILLIS (100ms).
@@ -728,28 +731,26 @@ test.describe('sandbox features', () => {
 
     await page.locator('.app').press('Escape');
 
-    // re-send — no sandbox error; this === undefined. 
+    // re-send — no sandbox error; this === undefined.
     await page.getByTestId('request-pane').getByRole('button', { name: 'Send' }).click();
     await expect
       .soft(page.getByTestId('response-pane'))
       .not.toContainText("The script was blocked because it used 'this'.");
-    await expect
-      .soft(page.locator('[data-testid="response-status-tag"]:visible'))
-      .toContainText('200 OK');
+    await expect.soft(page.locator('[data-testid="response-status-tag"]:visible')).toContainText('200 OK');
   });
 
-  // Blocked Properties / Prototype Mutation group: 'prototype' is blocked. 
+  // Blocked Properties / Prototype Mutation group: 'prototype' is blocked.
   test('blocked properties / prototype mutation group', async ({ page }) => {
     await page.getByLabel('Request Collection').getByTestId('echo pre-request script result').press('Enter');
 
-    // enter script that accesses Object.prototype. 
+    // enter script that accesses Object.prototype.
     await page.getByRole('tab', { name: 'Scripts' }).click();
     const editor = page.getByTestId('CodeEditor').getByRole('textbox');
     await editor.fill(`insomnia.environment.set('result', typeof Object.prototype.toString);`);
-    
+
     // CodeMirror debounces onChange by DEBOUNCE_MILLIS (100ms).
     await page.evaluate(() => new Promise(resolve => setTimeout(resolve, 150)));
-    
+
     await page.getByTestId('request-pane').getByRole('button', { name: 'Send' }).click();
 
     // verify blocked-property error
@@ -761,7 +762,9 @@ test.describe('sandbox features', () => {
     await page.getByTestId('settings-button').click();
     await page.locator('text=Insomnia Preferences').first().click();
     await page.getByRole('tab', { name: 'Scripting' }).click();
-    const protoMutationSwitch = page.locator('div:has(> h4:has-text("Prototype Mutation")) label[data-react-aria-pressable]');
+    const protoMutationSwitch = page.locator(
+      'div:has(> h4:has-text("Prototype Mutation")) label[data-react-aria-pressable]',
+    );
     await protoMutationSwitch.scrollIntoViewIfNeeded();
     await protoMutationSwitch.click();
     await expect.soft(protoMutationSwitch).not.toHaveAttribute('data-selected');
@@ -772,29 +775,25 @@ test.describe('sandbox features', () => {
     await expect
       .soft(page.getByTestId('response-pane'))
       .not.toContainText("The script was blocked because it used the property 'prototype'.");
-    await expect
-      .soft(page.locator('[data-testid="response-status-tag"]:visible'))
-      .toContainText('200 OK');
+    await expect.soft(page.locator('[data-testid="response-status-tag"]:visible')).toContainText('200 OK');
   });
 
   // Mask Rules / Runtime APIs group: 'Function' is masked to undefined at runtime.
   test('Mask Rules / Runtime APIs group.', async ({ page }) => {
     await page.getByLabel('Request Collection').getByTestId('echo pre-request script result').press('Enter');
 
-    // enter script that uses the Function constructor, only masked at runtime. 
+    // enter script that uses the Function constructor, only masked at runtime.
     await page.getByRole('tab', { name: 'Scripts' }).click();
     const editor = page.getByTestId('CodeEditor').getByRole('textbox');
     await editor.fill(`const f = new Function('return 42'); insomnia.environment.set('result', f());`);
-    
+
     // CodeMirror debounces onChange by DEBOUNCE_MILLIS (100ms).
     await page.evaluate(() => new Promise(resolve => setTimeout(resolve, 150)));
 
     // send — Function masked to undefined → V8 uses the identifier name: "Function is not a constructor"
     await page.getByTestId('request-pane').getByRole('button', { name: 'Send' }).click();
 
-    await expect
-      .soft(page.getByTestId('response-pane'))
-      .toContainText('Function is not a constructor');
+    await expect.soft(page.getByTestId('response-pane')).toContainText('Function is not a constructor');
 
     // navigate to Settings → Scripting, disable the "Runtime APIs" mask group
     await page.getByTestId('settings-button').click();
@@ -808,25 +807,21 @@ test.describe('sandbox features', () => {
 
     // re-send — Function is now the real constructor; script returns 42
     await page.getByTestId('request-pane').getByRole('button', { name: 'Send' }).click();
-    await expect
-      .soft(page.getByTestId('response-pane'))
-      .not.toContainText('Function is not a constructor');
-    await expect
-      .soft(page.locator('[data-testid="response-status-tag"]:visible'))
-      .toContainText('200 OK');
+    await expect.soft(page.getByTestId('response-pane')).not.toContainText('Function is not a constructor');
+    await expect.soft(page.locator('[data-testid="response-status-tag"]:visible')).toContainText('200 OK');
   });
 
   test('Layered security / unblocked properties resolve undefined', async ({ page }) => {
     await page.getByLabel('Request Collection').getByTestId('echo pre-request script result').press('Enter');
 
-    // enter script that accesses a property on 'process'. 
+    // enter script that accesses a property on 'process'.
     await page.getByRole('tab', { name: 'Scripts' }).click();
     const editor = page.getByTestId('CodeEditor').getByRole('textbox');
     await editor.fill(`insomnia.environment.set('result', String(process?.version));`);
-    
+
     // CodeMirror debounces onChange by DEBOUNCE_MILLIS (100ms).
     await page.evaluate(() => new Promise(resolve => setTimeout(resolve, 150)));
-    
+
     await page.getByTestId('request-pane').getByRole('button', { name: 'Send' }).click();
 
     // verify blocked-root error
@@ -838,19 +833,19 @@ test.describe('sandbox features', () => {
     await page.getByTestId('settings-button').click();
     await page.locator('text=Insomnia Preferences').first().click();
     await page.getByRole('tab', { name: 'Scripting' }).click();
-    const nodeInternalsSwitch = page.locator('xpath=//h4[normalize-space(text())="Node.js Internals"]/following-sibling::div[1]//label[@data-react-aria-pressable]');
+    const nodeInternalsSwitch = page.locator(
+      'xpath=//h4[normalize-space(text())="Node.js Internals"]/following-sibling::div[1]//label[@data-react-aria-pressable]',
+    );
     await nodeInternalsSwitch.scrollIntoViewIfNeeded();
     await nodeInternalsSwitch.click();
     await expect.soft(nodeInternalsSwitch).not.toHaveAttribute('data-selected');
     await page.locator('.app').press('Escape');
 
-    // process?.version === undefined. 
+    // process?.version === undefined.
     await page.getByTestId('request-pane').getByRole('button', { name: 'Send' }).click();
     await expect
       .soft(page.getByTestId('response-pane'))
       .not.toContainText("The script was blocked because it used 'process'.");
-    await expect
-      .soft(page.locator('[data-testid="response-status-tag"]:visible'))
-      .toContainText('200 OK');
+    await expect.soft(page.locator('[data-testid="response-status-tag"]:visible')).toContainText('200 OK');
   });
 });
