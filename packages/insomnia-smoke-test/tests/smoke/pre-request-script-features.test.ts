@@ -439,11 +439,8 @@ test.describe('pre-request features tests', () => {
     await page.getByTestId('request-pane').getByRole('button', { name: 'Send' }).click();
     // verify
     await page.getByRole('tab', { name: 'Console' }).click();
-    // test certificate manipulation script replaces the active cert with an invalid one
-    // it should not be used
-    const bodyText = await responsePane.innerText();
-    expect.soft(bodyText).not.toContain('Adding SSL PEM certificate');
-    expect.soft(bodyText).not.toContain('Adding SSL KEY certificate');
+    await expect.soft(responsePane).toContainText('* Adding SSL PEM certificate');
+    await expect.soft(responsePane).toContainText('Adding SSL KEY certificate');
   });
 
   test('insomnia.request / update clientCertificate', async ({ page }) => {
@@ -460,11 +457,8 @@ test.describe('pre-request features tests', () => {
     await page.getByTestId('request-pane').getByRole('button', { name: 'Send' }).click();
     // verify
     await page.getByRole('tab', { name: 'Console' }).click();
-    // test certificate manipulation script replaces the active cert with an invalid one
-    // it should not be used
-    const bodyText = await responsePane.innerText();
-    expect.soft(bodyText).not.toContain('Adding SSL PEM certificate');
-    expect.soft(bodyText).not.toContain('Adding SSL KEY certificate');
+    await expect.soft(responsePane).toContainText('Adding SSL PEM certificate');
+    await expect.soft(responsePane).toContainText('Adding SSL KEY certificate');
   });
 
   test('insomnia.test and insomnia.expect can work together', async ({ page }) => {
