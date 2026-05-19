@@ -63,7 +63,7 @@ export async function trackAnalyticsEvent(event: AnalyticsEvent, properties?: Re
     return;
   }
   const settings = await services.settings.getOrCreate();
-  const userSession = await services.userSession.getOrCreate();
+  const userSession = await services.userSession.get();
   if (!userSession?.hashedAccountId) {
     userSession.hashedAccountId = userSession?.accountId ? hashString(userSession.accountId) : '';
   }
@@ -105,7 +105,7 @@ export async function trackPageView(name: string) {
     return;
   }
   const settings = await services.settings.getOrCreate();
-  const userSession = await services.userSession.getOrCreate();
+  const userSession = await services.userSession.get();
   if (!userSession?.hashedAccountId) {
     userSession.hashedAccountId = userSession?.accountId ? hashString(userSession.accountId) : '';
   }
