@@ -272,6 +272,8 @@ const main: Window['main'] = {
   openDeepLink: options => ipcRenderer.send('openDeepLink', options),
   halfSecondAfterAppStart: () => ipcRenderer.send('halfSecondAfterAppStart'),
   manualUpdateCheck: () => ipcRenderer.send('manualUpdateCheck'),
+  applyUpdateAndRestart: () => ipcRenderer.send('applyUpdateAndRestart'),
+  getUpdateStatus: () => ipcRenderer.sendSync('getUpdateStatus'),
   backup: () => invokeWithNormalizedError('backup'),
   restoreBackup: options => invokeWithNormalizedError('restoreBackup', options),
   authorizeUserInWindow: options => invokeWithNormalizedError('authorizeUserInWindow', options),
@@ -512,6 +514,8 @@ const env: Window['env'] = {
   BUILD_DATE: process.env.BUILD_DATE,
   // Windows portable binary sentinel: presence disables auto-updates
   PORTABLE_EXECUTABLE_DIR: process.env.PORTABLE_EXECUTABLE_DIR,
+  // Dev override: presence re-enables auto-updates in development mode
+  ALLOW_UPDATES_IN_DEV: process.env.ALLOW_UPDATES_IN_DEV,
   // OAuth flow URL overrides for dev/staging environments
   OAUTH_REDIRECT_URL: process.env.OAUTH_REDIRECT_URL,
   OAUTH_RELAY_URL: process.env.OAUTH_RELAY_URL,
