@@ -1,4 +1,4 @@
-import { contextBridge, ipcRenderer, webUtils as webUtilities } from 'electron';
+import { contextBridge, ipcRenderer, type IpcRendererEvent, webUtils as webUtilities } from 'electron';
 import type { AuthTypeOAuth2, OAuth2Token, RequestHeader } from 'insomnia-data';
 
 import type {
@@ -197,10 +197,6 @@ const sync: SyncBridgeAPI = {
     invokeSyncMethod('switchAndCreateBackendProjectIfNotExist', ...args),
   takeSnapshot: (...args) => invokeSyncMethod('takeSnapshot', ...args),
   unstage: (...args) => invokeSyncMethod('unstage', ...args),
-  on: (channel, listener) => {
-    ipcRenderer.on(channel, listener);
-    return () => ipcRenderer.removeListener(channel, listener);
-  },
 };
 
 const git: GitServiceAPI = {
@@ -313,8 +309,13 @@ const main: Window['main'] = {
   lintSpec: options => invokeWithNormalizedError('lintSpec', options),
   bundleSpectralRuleset: options => invokeWithNormalizedError('bundleSpectralRuleset', options),
   on: (channel, listener) => {
-    ipcRenderer.on(channel, listener);
-    return () => ipcRenderer.removeListener(channel, listener);
+    // Under contextIsolation the IpcRendererEvent can't be cloned across the
+    // contextBridge; no listener uses it, so drop it and forward only the
+    // (cloneable) payload args.
+    const handler = (_event: IpcRendererEvent, ...args: unknown[]) =>
+      (listener as (event: unknown, ...args: unknown[]) => void)(undefined, ...args);
+    ipcRenderer.on(channel, handler);
+    return () => ipcRenderer.removeListener(channel, handler);
   },
   cookies,
   webSocket,
@@ -468,10 +469,9 @@ const dialog: Window['dialog'] = {
 const app: Window['app'] = {
   getPath: options => ipcRenderer.sendSync('getPath', options),
   getAppPath: () => ipcRenderer.sendSync('getAppPath'),
+  // platform is constant; expose a plain value so it survives contextBridge cloning (getters are not preserved).
   process: {
-    get platform() {
-      return process.platform as NodeJS.Platform;
-    },
+    platform: process.platform as NodeJS.Platform,
   },
 };
 const shell: Window['shell'] = {
@@ -535,7 +535,13 @@ if (process.contextIsolated) {
   contextBridge.exposeInMainWorld('webUtils', webUtils);
   contextBridge.exposeInMainWorld('path', path);
   contextBridge.exposeInMainWorld('database', database);
-  contextBridge.exposeInMainWorld('_dataServices', servicesProxy);
+  // A Proxy cannot be cloned across the contextBridge, so expose a flat invoke
+  // function and rebuild the services Proxy in the isolated renderer world.
+  contextBridge.exposeInMainWorld(
+    '_dataServicesInvoke',
+    (serviceName: string, methodName: string, ...args: unknown[]) =>
+      invokeWithNormalizedError('services.invoke', serviceName, methodName, ...args),
+  );
   contextBridge.exposeInMainWorld('env', env);
 } else {
   window.main = main;
